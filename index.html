@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Koda CrossFit Iron View — Waiver &amp; Release</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📝</text></svg>">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #1a1a2e;
+      color: #e0e0e0;
+      min-height: 100vh;
+      padding: 24px 16px 60px;
+    }
+
+    .container { max-width: 720px; margin: 0 auto; }
+
+    .logo { display: block; margin: 0 auto 12px; height: 88px; filter: invert(1); }
+
+    h1 { text-align: center; font-size: 1.65rem; color: #fff; margin-bottom: 4px; }
+
+    .subtitle { text-align: center; color: #aaa; margin-bottom: 26px; font-size: 0.95rem; }
+
+    .card {
+      background: #16213e;
+      border-radius: 12px;
+      padding: 22px;
+      margin-bottom: 16px;
+    }
+
+    .card h2 {
+      color: #e0b452;
+      font-size: 1.02rem;
+      margin-bottom: 10px;
+      text-align: center;
+      letter-spacing: 0.02em;
+    }
+
+    .card p {
+      font-size: 0.92rem;
+      line-height: 1.6;
+      color: #cfd3dc;
+      margin-bottom: 10px;
+    }
+    .card p:last-child { margin-bottom: 0; }
+
+    .caps { color: #fff; font-weight: 600; }
+
+    .callout {
+      border: 1px solid #e0b452;
+      background: rgba(224, 180, 82, 0.07);
+    }
+    .callout p { color: #fff; font-weight: 600; }
+
+    /* ── Form ── */
+    .field { margin-bottom: 16px; }
+
+    label { font-weight: 600; font-size: 0.9rem; display: block; margin-bottom: 6px; color: #fff; }
+    .optional { color: #8a90a0; font-weight: 400; }
+
+    input[type=text], input[type=email] {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid #444;
+      border-radius: 8px;
+      background: #1a1a2e;
+      color: #fff;
+      font-size: 16px;
+    }
+    input[type=text]:focus, input[type=email]:focus { outline: none; border-color: #e0b452; }
+
+    .row2 { display: flex; gap: 14px; flex-wrap: wrap; }
+    .row2 .field { flex: 1; min-width: 220px; }
+
+    .check {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      cursor: pointer;
+      font-size: 0.92rem;
+      line-height: 1.5;
+      color: #cfd3dc;
+    }
+    .check input { width: 20px; height: 20px; margin-top: 1px; flex: none; accent-color: #e0b452; cursor: pointer; }
+
+    #guardianField { display: none; }
+
+    /* ── Signature pad ── */
+    .sig-head { display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 6px; }
+    .sig-date { color: #aaa; font-size: 0.88rem; }
+
+    .sig-wrap { background: #fff; border-radius: 10px; position: relative; overflow: hidden; }
+
+    #sigCanvas { display: block; width: 100%; height: 180px; touch-action: none; cursor: crosshair; }
+
+    .sig-hint {
+      position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      color: #9aa1ad; pointer-events: none; font-size: 0.95rem;
+    }
+    .sig-line { position: absolute; left: 24px; right: 24px; bottom: 36px; border-bottom: 1.5px dashed #c9ced6; pointer-events: none; }
+    .sig-x { position: absolute; left: 24px; bottom: 42px; color: #b6bcc7; font-size: 1.05rem; pointer-events: none; }
+
+    .sig-actions { margin-top: 10px; text-align: right; }
+    .clear-btn {
+      background: none;
+      border: 1px solid #555;
+      color: #aaa;
+      padding: 7px 14px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      cursor: pointer;
+    }
+    .clear-btn:hover { border-color: #e0b452; color: #e0b452; }
+
+    .submit-btn {
+      width: 100%;
+      background: #e0b452;
+      color: #1a1a2e;
+      font-weight: 800;
+      font-size: 1.05rem;
+      border: none;
+      padding: 16px;
+      border-radius: 10px;
+      cursor: pointer;
+      margin-top: 4px;
+    }
+    .submit-btn:hover:not(:disabled) { background: #eac267; }
+    .submit-btn:disabled { opacity: 0.55; cursor: not-allowed; }
+
+    .err { color: #f87171; font-size: 0.92rem; margin-top: 12px; text-align: center; display: none; }
+
+    /* ── Success ── */
+    #successCard { display: none; text-align: center; padding: 44px 22px; }
+    #successCard .big { font-size: 3rem; margin-bottom: 10px; }
+    #successCard h2 { color: #fff; font-size: 1.3rem; margin-bottom: 10px; }
+    #successCard p { color: #cfd3dc; }
+    .again-btn {
+      margin-top: 22px;
+      background: none;
+      border: 1px solid #e0b452;
+      color: #e0b452;
+      padding: 11px 22px;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      cursor: pointer;
+    }
+
+    .foot { text-align: center; color: #8a90a0; font-size: 0.82rem; margin-top: 26px; line-height: 1.6; }
+    .foot a { color: #aaa; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <img class="logo" src="koda-logo.png" alt="Koda CrossFit">
+    <h1>Koda CrossFit Iron View</h1>
+    <div class="subtitle">Waiver and Release</div>
+
+    <div id="waiverText">
+      <div class="card">
+        <p>This form is an important legal document. It explains the risks you are assuming by participation in classes and workouts at Koda CrossFit Iron View. It is important that you read and understand it completely. After you have done so, please fill out and execute at the bottom.</p>
+      </div>
+
+      <div class="card">
+        <h2>Waiver, Informed Consent, and Covenant Not to Sue</h2>
+        <p>I have willingly volunteered to participate in physical conditioning and activities under the direction of Koda CrossFit Iron View, which will include, but may not be limited to, weight, endurance, and/or resistance training. I do here and forever release and discharge and hereby hold harmless Koda CrossFit Iron View and its respective agents, heirs, assigns, contractors, volunteers, sponsors, judges, and employees from any and all claims, demands, damages, rights of action, or causes of action, present or future, arising out of or connected with my participation in activities at Koda CrossFit Iron View, including any injuries resulting therefrom. <span class="caps">THIS WAIVER AND RELEASE OF LIABILITY INCLUDES, WITHOUT LIMITATION, INJURIES WHICH MAY OCCUR AS A RESULT OF (1) EQUIPMENT THAT MAY MALFUNCTION OR BREAK, (2) ANY SLIP, FALL, OR DROPPING OF EQUIPMENT, AND (3) NEGLIGENT INSTRUCTION OR SUPERVISION.</span></p>
+      </div>
+
+      <div class="card">
+        <h2>Assumption of Risk</h2>
+        <p>I recognize that exercise might be difficult and strenuous and that there could be dangers inherent in exercise for some individuals. I acknowledge that certain unusual physical changes during exercise may occur. These changes include abnormal blood pressure, fainting, disorders in heartbeat, heart attack, and, in rare instances, death.</p>
+        <p>I understand that as a result of my willing participation in activities at Koda CrossFit Iron View, I could suffer an injury or physical disorder that could result in my becoming partially or totally disabled and incapable of performing any gainful employment or having a normal social life.</p>
+        <p>As a willing participant in activities at Koda CrossFit Iron View, I represent and warrant that I have been examined by a competent physician who has determined that I am physically capable of participating in such activities.</p>
+        <p>I acknowledge and agree that I assume the risks associated with any and all activities and/or exercises in which I participate. I understand and acknowledge that I may terminate my participation in any physical activity at any time for any reason I deem necessary.</p>
+        <p><span class="caps">I ACKNOWLEDGE THAT I HAVE READ THIS WAIVER AND RELEASE AND FULLY UNDERSTAND THAT IT IS A RELEASE OF LIABILITY. BY SIGNING THIS DOCUMENT, I AM WAIVING ANY RIGHT I OR MY SUCCESSORS MIGHT HAVE TO BRING LEGAL ACTION OR ASSERT A CLAIM AGAINST KODA CROSSFIT IRON VIEW AND/OR THE OTHERS REFERRED TO IN THIS DOCUMENT FOR ANY NEGLIGENCE.</span></p>
+      </div>
+
+      <div class="card">
+        <h2>Photography and Audio/Video Recording</h2>
+        <p>I hereby give Koda CrossFit Iron View permission to video tape, photograph, and record my image and/or my likeness during my participation in any activities at Koda CrossFit Iron View. I also understand that giving this permission is in no way an endorsement of Koda CrossFit Iron View or any products distributed by Koda CrossFit Iron View.</p>
+      </div>
+
+      <div class="card callout">
+        <p>I HAVE CAREFULLY READ THIS DOCUMENT AND I FULLY UNDERSTAND ITS CONTENTS. I AM AWARE THAT THIS IS A RELEASE OF LIABILITY AND A CONTRACT BETWEEN ME AND KODA CROSSFIT IRON VIEW.</p>
+      </div>
+    </div>
+
+    <div class="card" id="formCard">
+      <h2>Sign Below</h2>
+
+      <div class="field">
+        <label for="athleteName">Athlete's Name (printed)</label>
+        <input type="text" id="athleteName" autocomplete="name" placeholder="Full name">
+      </div>
+
+      <div class="row2">
+        <div class="field">
+          <label for="email">E-mail Address for Follow Up</label>
+          <input type="email" id="email" autocomplete="email" placeholder="you@example.com">
+        </div>
+        <div class="field">
+          <label for="referredBy">Referred By <span class="optional">(optional)</span></label>
+          <input type="text" id="referredBy" placeholder="Friend, Google, Instagram…">
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="check">
+          <input type="checkbox" id="isMinor">
+          <span>The athlete is under 18 — a parent or guardian is signing this waiver.</span>
+        </label>
+      </div>
+
+      <div class="field" id="guardianField">
+        <label for="guardianName">Parent/Guardian Name (printed)</label>
+        <input type="text" id="guardianName" placeholder="Parent or guardian full name">
+      </div>
+
+      <div class="field">
+        <label class="check">
+          <input type="checkbox" id="agree">
+          <span>I have carefully read this waiver and release, I fully understand its contents, and I voluntarily agree to its terms. I am aware that this is a release of liability and a contract between me and Koda CrossFit Iron View, and I sign it of my own free will.</span>
+        </label>
+      </div>
+
+      <div class="field">
+        <div class="sig-head">
+          <label id="sigLabel" for="sigCanvas">Athlete Signature</label>
+          <span class="sig-date">Date: <span id="todayDisplay"></span></span>
+        </div>
+        <div class="sig-wrap">
+          <canvas id="sigCanvas"></canvas>
+          <div class="sig-hint" id="sigHint">Sign here with your finger or mouse</div>
+          <div class="sig-x">✕</div>
+          <div class="sig-line"></div>
+        </div>
+        <div class="sig-actions">
+          <button type="button" class="clear-btn" id="clearSig">Clear signature</button>
+        </div>
+      </div>
+
+      <button type="button" class="submit-btn" id="submitBtn">Sign &amp; Submit Waiver</button>
+      <div class="err" id="errMsg"></div>
+    </div>
+
+    <div class="card" id="successCard">
+      <div class="big">✅</div>
+      <h2 id="successTitle">You're all set!</h2>
+      <p id="successMsg">Your signed waiver is on file with Koda CrossFit Iron View.</p>
+      <button type="button" class="again-btn" onclick="location.reload()">Sign another waiver</button>
+    </div>
+
+    <div class="foot">
+      Koda CrossFit Iron View<br>
+      Questions? <a href="mailto:kodaironview@gmail.com">kodaironview@gmail.com</a>
+    </div>
+  </div>
+
+  <script>
+    var API = "https://script.google.com/macros/s/AKfycbyk14st_Ix70GM0T2I8aKRU9HRBlotk_Up-Ikh5MHxYuUdDj4xIvj36r8lvQh15gPvm/exec";
+
+    // ── Date display ──
+    var now = new Date();
+    document.getElementById("todayDisplay").textContent =
+      now.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
+    function isoDate(d) {
+      return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+    }
+
+    // ── Minor toggle ──
+    var isMinorEl = document.getElementById("isMinor");
+    isMinorEl.addEventListener("change", function () {
+      document.getElementById("guardianField").style.display = this.checked ? "block" : "none";
+      document.getElementById("sigLabel").textContent = this.checked ? "Parent/Guardian Signature" : "Athlete Signature";
+    });
+
+    // ── Signature pad ──
+    var canvas = document.getElementById("sigCanvas");
+    var ctx = canvas.getContext("2d");
+    var drawing = false, hasInk = false, last = null;
+
+    function initCanvas() {
+      var r = canvas.getBoundingClientRect();
+      var dpr = window.devicePixelRatio || 1;
+      // snapshot existing ink so a resize doesn't wipe the signature
+      var snap = null;
+      if (hasInk) {
+        snap = document.createElement("canvas");
+        snap.width = canvas.width; snap.height = canvas.height;
+        snap.getContext("2d").drawImage(canvas, 0, 0);
+      }
+      canvas.width = Math.round(r.width * dpr);
+      canvas.height = Math.round(r.height * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, r.width, r.height);
+      if (snap) ctx.drawImage(snap, 0, 0, snap.width, snap.height, 0, 0, r.width, r.height);
+      ctx.lineWidth = 2.5;
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
+      ctx.strokeStyle = "#1a1a2e";
+    }
+
+    function pos(e) {
+      var r = canvas.getBoundingClientRect();
+      return { x: e.clientX - r.left, y: e.clientY - r.top };
+    }
+
+    canvas.addEventListener("pointerdown", function (e) {
+      e.preventDefault();
+      canvas.setPointerCapture(e.pointerId);
+      drawing = true;
+      last = pos(e);
+      ctx.beginPath();
+      ctx.moveTo(last.x, last.y);
+      ctx.lineTo(last.x + 0.01, last.y + 0.01);
+      ctx.stroke();
+      hasInk = true;
+      document.getElementById("sigHint").style.display = "none";
+    });
+    canvas.addEventListener("pointermove", function (e) {
+      if (!drawing) return;
+      e.preventDefault();
+      var p = pos(e);
+      ctx.beginPath();
+      ctx.moveTo(last.x, last.y);
+      ctx.lineTo(p.x, p.y);
+      ctx.stroke();
+      last = p;
+    });
+    ["pointerup", "pointercancel", "pointerleave"].forEach(function (evt) {
+      canvas.addEventListener(evt, function () { drawing = false; });
+    });
+
+    document.getElementById("clearSig").addEventListener("click", function () {
+      hasInk = false;
+      initCanvas();
+      document.getElementById("sigHint").style.display = "flex";
+    });
+
+    window.addEventListener("resize", initCanvas);
+    initCanvas();
+
+    // ── Submit ──
+    var submitBtn = document.getElementById("submitBtn");
+
+    function fail(msg) {
+      var el = document.getElementById("errMsg");
+      el.textContent = msg;
+      el.style.display = "block";
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Sign & Submit Waiver";
+    }
+
+    submitBtn.addEventListener("click", function () {
+      document.getElementById("errMsg").style.display = "none";
+
+      var athleteName = document.getElementById("athleteName").value.trim();
+      var email = document.getElementById("email").value.trim();
+      var referredBy = document.getElementById("referredBy").value.trim();
+      var isMinor = isMinorEl.checked;
+      var guardianName = document.getElementById("guardianName").value.trim();
+
+      if (!athleteName) return fail("Please enter the athlete's name.");
+      if (!email || !/^\S+@\S+\.\S+$/.test(email)) return fail("Please enter a valid e-mail address.");
+      if (isMinor && !guardianName) return fail("Please enter the parent/guardian's name.");
+      if (!document.getElementById("agree").checked) return fail("Please check the box confirming you have read and agree to the waiver.");
+      if (!hasInk) return fail("Please sign in the signature box.");
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Submitting…";
+
+      var payload = {
+        action: "waiverSubmit",
+        athleteName: athleteName,
+        email: email,
+        referredBy: referredBy,
+        isMinor: isMinor,
+        guardianName: isMinor ? guardianName : "",
+        dateSigned: isoDate(now),
+        signaturePng: canvas.toDataURL("image/png").split(",")[1],
+        userAgent: navigator.userAgent,
+        page: location.href
+      };
+
+      fetch(API, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify(payload)
+      })
+        .then(function (r) { return r.json(); })
+        .then(function (res) {
+          if (res && res.status === "ok") {
+            var first = (isMinor && guardianName ? guardianName : athleteName).split(" ")[0];
+            document.getElementById("successTitle").textContent = "You're all set, " + first + "!";
+            document.getElementById("successMsg").textContent =
+              "Your signed waiver is on file with Koda CrossFit Iron View. A copy has been emailed to " + email + ".";
+            document.getElementById("formCard").style.display = "none";
+            document.getElementById("waiverText").style.display = "none";
+            document.getElementById("successCard").style.display = "block";
+            window.scrollTo({ top: 0, behavior: "smooth" });
+          } else {
+            fail("Something went wrong submitting the waiver. Please try again, or see the front desk.");
+          }
+        })
+        .catch(function () {
+          fail("Couldn't reach the server. Please check your connection and try again.");
+        });
+    });
+  </script>
+</body>
+</html>
