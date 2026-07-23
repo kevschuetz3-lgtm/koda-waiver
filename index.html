@@ -311,6 +311,7 @@
 
     canvas.addEventListener("pointerdown", function (e) {
       e.preventDefault();
+      if (!canvas.width) initCanvas(); // canvas laid out after load (hidden tab, etc.)
       canvas.setPointerCapture(e.pointerId);
       drawing = true;
       last = pos(e);
