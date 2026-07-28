@@ -55,7 +55,7 @@
     label { font-weight: 600; font-size: 0.9rem; display: block; margin-bottom: 6px; color: #fff; }
     .optional { color: #8a90a0; font-weight: 400; }
 
-    input[type=text], input[type=email] {
+    input[type=text], input[type=email], select {
       width: 100%;
       padding: 12px 14px;
       border: 1px solid #444;
@@ -64,7 +64,19 @@
       color: #fff;
       font-size: 16px;
     }
-    input[type=text]:focus, input[type=email]:focus { outline: none; border-color: #e0b452; }
+    input[type=text]:focus, input[type=email]:focus, select:focus { outline: none; border-color: #e0b452; }
+
+    select {
+      appearance: none;
+      -webkit-appearance: none;
+      padding-right: 40px;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%23e0b452' stroke-width='2'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+      cursor: pointer;
+    }
+    select:invalid { color: #9aa1ad; }
+    select option { color: #fff; background: #1a1a2e; }
 
     .row2 { display: flex; gap: 14px; flex-wrap: wrap; }
     .row2 .field { flex: 1; min-width: 220px; }
@@ -188,6 +200,19 @@
       <div class="field">
         <label for="athleteName">Athlete's Name (printed)</label>
         <input type="text" id="athleteName" autocomplete="name" placeholder="Full name">
+      </div>
+
+      <div class="field">
+        <label for="program">Class Program</label>
+        <select id="program" required>
+          <option value="" disabled selected>Select a program…</option>
+          <option>CrossFit</option>
+          <option>Hyrox</option>
+          <option>Women's Class</option>
+          <option>Koda Kids/Teens</option>
+          <option>Kratos (Oly)</option>
+          <option>KodaFit</option>
+        </select>
       </div>
 
       <div class="row2">
@@ -354,12 +379,14 @@
       document.getElementById("errMsg").style.display = "none";
 
       var athleteName = document.getElementById("athleteName").value.trim();
+      var program = document.getElementById("program").value;
       var email = document.getElementById("email").value.trim();
       var referredBy = document.getElementById("referredBy").value.trim();
       var isMinor = isMinorEl.checked;
       var guardianName = document.getElementById("guardianName").value.trim();
 
       if (!athleteName) return fail("Please enter the athlete's name.");
+      if (!program) return fail("Please select a class program.");
       if (!email || !/^\S+@\S+\.\S+$/.test(email)) return fail("Please enter a valid e-mail address.");
       if (isMinor && !guardianName) return fail("Please enter the parent/guardian's name.");
       if (!document.getElementById("agree").checked) return fail("Please check the box confirming you have read and agree to the waiver.");
@@ -371,6 +398,7 @@
       var payload = {
         action: "waiverSubmit",
         athleteName: athleteName,
+        program: program,
         email: email,
         referredBy: referredBy,
         isMinor: isMinor,
