@@ -139,6 +139,52 @@
 
     .err { color: #f87171; font-size: 0.92rem; margin-top: 12px; text-align: center; display: none; }
 
+    /* ── Visit type & drop-in questions ── */
+    .choice-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .choice-grid.cols3 { grid-template-columns: repeat(3, 1fr); }
+    @media (max-width: 600px) { .choice-grid, .choice-grid.cols3 { grid-template-columns: 1fr; } }
+
+    .choice-btn {
+      background: #1a1a2e;
+      border: 1.5px solid #444;
+      border-radius: 10px;
+      padding: 13px 12px;
+      color: #fff;
+      font-size: 0.98rem;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      text-align: center;
+    }
+    .choice-btn .sub { display: block; color: #8a90a0; font-size: 0.8rem; margin-top: 3px; font-weight: 400; }
+    .choice-btn:hover { border-color: #e0b452; }
+    .choice-btn.sel { border-color: #e0b452; background: rgba(224, 180, 82, 0.14); }
+    .choice-btn.sel .sub { color: #cbb27a; }
+
+    .pay-box {
+      background: #1a1a2e;
+      border: 1px dashed #e0b452;
+      border-radius: 10px;
+      padding: 14px 16px;
+      font-size: 0.92rem;
+      line-height: 1.55;
+      color: #cfd3dc;
+    }
+    .pay-box b { color: #fff; }
+    .pay-box a { color: #e0b452; }
+    .pay-link {
+      display: inline-block;
+      margin-top: 10px;
+      background: #e0b452;
+      color: #1a1a2e !important;
+      font-weight: 800;
+      padding: 12px 20px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-size: 0.95rem;
+    }
+    .pay-link:hover { background: #eac267; }
+
     /* ── Success ── */
     #successCard { display: none; text-align: center; padding: 44px 22px; }
     #successCard .big { font-size: 3rem; margin-bottom: 10px; }
@@ -165,7 +211,41 @@
     <h1>Koda CrossFit Iron View</h1>
     <div class="subtitle">Waiver and Release</div>
 
-    <div id="waiverText">
+    <div class="card" id="visitCard">
+      <h2>Welcome! What brings you in?</h2>
+      <div class="choice-grid">
+        <button type="button" class="choice-btn" id="btnLocal">Local Trial Class<span class="sub">I live in the area and want to try Koda</span></button>
+        <button type="button" class="choice-btn" id="btnDropin">Out-of-Town Drop-In<span class="sub">I&#8217;m visiting and want to work out</span></button>
+      </div>
+
+      <div id="dropinQs" style="display:none">
+        <div class="field" style="margin-top:18px">
+          <label for="visitFrom">Where are you from?</label>
+          <input type="text" id="visitFrom" placeholder="City, state (or country)">
+        </div>
+
+        <div class="field">
+          <label>How long are you in town?</label>
+          <div class="choice-grid cols3" id="durationBtns">
+            <button type="button" class="choice-btn" data-duration="1visit">1 Visit<span class="sub">$25 &mdash; or an apparel purchase</span></button>
+            <button type="button" class="choice-btn" data-duration="week">Unlimited Week<span class="sub">$60</span></button>
+            <button type="button" class="choice-btn" data-duration="longer">Longer<span class="sub">More than a week</span></button>
+          </div>
+        </div>
+
+        <div class="field" id="paymentField" style="display:none; margin-bottom:0">
+          <label>How would you like to pay?</label>
+          <div class="choice-grid" id="paymentBtns"></div>
+          <div id="payBox" class="pay-box" style="display:none; margin-top:12px"></div>
+        </div>
+
+        <div id="longerBox" class="pay-box" style="display:none">
+          Staying more than a week? Awesome &mdash; we&#8217;ll set you up with the membership option that fits your stay. Chat with us at the front desk, or email <a href="mailto:kodaironview@gmail.com">kodaironview@gmail.com</a>. Go ahead and finish your waiver below. 💪
+        </div>
+      </div>
+    </div>
+
+    <div id="waiverText" style="display:none">
       <div class="card">
         <p>This form is an important legal document. It explains the risks you are assuming by participation in classes and workouts at Koda CrossFit Iron View. It is important that you read and understand it completely. After you have done so, please fill out and execute at the bottom.</p>
       </div>
@@ -194,7 +274,7 @@
       </div>
     </div>
 
-    <div class="card" id="formCard">
+    <div class="card" id="formCard" style="display:none">
       <h2>Sign Below</h2>
 
       <div class="field">
@@ -269,6 +349,7 @@
       <div class="big">✅</div>
       <h2 id="successTitle">You're all set!</h2>
       <p id="successMsg">Your signed waiver is on file with Koda CrossFit Iron View.</p>
+      <div id="successPay" class="pay-box" style="display:none; margin-top:20px; text-align:left"></div>
       <button type="button" class="again-btn" onclick="location.reload()">Sign another waiver</button>
     </div>
 
@@ -287,6 +368,101 @@
       now.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
     function isoDate(d) {
       return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+    }
+
+    // ── Visit type & out-of-town drop-in flow ──
+    var ZEN_25 = "https://kodaironview.sites.zenplanner.com/retail-product.cfm?ProductId=2EE6B68B-42BF-4654-94B0-C14CA4DBB32A";
+    var ZEN_60 = "https://kodaironview.sites.zenplanner.com/retail-product.cfm?ProductId=1237FCA9-4A10-4179-A06B-F8711918B83A";
+    var VENMO_INFO = ""; // e.g. "@Koda-IronView" — shown to drop-ins who pick Venmo (empty = "ask at the front desk")
+    var ZELLE_INFO = ""; // e.g. a phone number or email — shown to drop-ins who pick Zelle (empty = "ask at the front desk")
+
+    var visitType = "";     // "local" | "dropin"
+    var visitDuration = ""; // "1visit" | "week" | "longer"
+    var visitPayment = "";  // "venmo" | "zelle" | "card" | "apparel"
+
+    var DURATIONS = {
+      "1visit": { sheet: "1 Visit ($25)", price: "$25" },
+      "week": { sheet: "Unlimited Week ($60)", price: "$60" },
+      "longer": { sheet: "Longer than a week", price: "" }
+    };
+    var PAYMENTS = { venmo: "Venmo", zelle: "Zelle", card: "Credit Card (Zen Planner)", apparel: "Apparel Purchase" };
+
+    function selVisit(type) {
+      visitType = type;
+      document.getElementById("btnLocal").classList.toggle("sel", type === "local");
+      document.getElementById("btnDropin").classList.toggle("sel", type === "dropin");
+      document.getElementById("dropinQs").style.display = type === "dropin" ? "block" : "none";
+      document.getElementById("waiverText").style.display = "block";
+      document.getElementById("formCard").style.display = "block";
+      initCanvas(); // canvas was hidden (zero-size) until now
+    }
+    document.getElementById("btnLocal").addEventListener("click", function () { selVisit("local"); });
+    document.getElementById("btnDropin").addEventListener("click", function () { selVisit("dropin"); });
+
+    var durationBtns = document.querySelectorAll("#durationBtns .choice-btn");
+    Array.prototype.forEach.call(durationBtns, function (b) {
+      b.addEventListener("click", function () {
+        visitDuration = b.getAttribute("data-duration");
+        Array.prototype.forEach.call(durationBtns, function (x) { x.classList.toggle("sel", x === b); });
+        // clear payment picks that no longer apply
+        if (visitDuration === "longer") visitPayment = "";
+        if (visitPayment === "apparel" && visitDuration !== "1visit") visitPayment = "";
+        renderPayment();
+      });
+    });
+
+    function renderPayment() {
+      var payField = document.getElementById("paymentField");
+      var longerBox = document.getElementById("longerBox");
+      if (visitDuration === "longer") {
+        payField.style.display = "none";
+        longerBox.style.display = "block";
+        return;
+      }
+      longerBox.style.display = "none";
+      if (!visitDuration) { payField.style.display = "none"; return; }
+      payField.style.display = "block";
+
+      var opts = [
+        { id: "venmo", label: "Venmo" },
+        { id: "zelle", label: "Zelle" },
+        { id: "card", label: "Credit Card", sub: "secure checkout online" }
+      ];
+      if (visitDuration === "1visit") opts.push({ id: "apparel", label: "Apparel Purchase", sub: "$25 of Koda gear instead" });
+
+      var wrap = document.getElementById("paymentBtns");
+      wrap.innerHTML = "";
+      opts.forEach(function (o) {
+        var btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "choice-btn" + (visitPayment === o.id ? " sel" : "");
+        btn.innerHTML = o.label + (o.sub ? '<span class="sub">' + o.sub + "</span>" : "");
+        btn.addEventListener("click", function () {
+          visitPayment = o.id;
+          renderPayment();
+        });
+        wrap.appendChild(btn);
+      });
+
+      var box = document.getElementById("payBox");
+      var price = (DURATIONS[visitDuration] || {}).price || "";
+      var html = "";
+      if (visitPayment === "venmo") {
+        html = VENMO_INFO
+          ? "Send <b>" + price + "</b> on Venmo to <b>" + VENMO_INFO + "</b> and put your name in the note. Then finish your waiver below!"
+          : "Venmo works great &mdash; we&#8217;ll get you the Venmo details at the front desk. Go ahead and finish your waiver below.";
+      } else if (visitPayment === "zelle") {
+        html = ZELLE_INFO
+          ? "Send <b>" + price + "</b> via Zelle to <b>" + ZELLE_INFO + "</b> and put your name in the memo. Then finish your waiver below!"
+          : "Zelle works great &mdash; we&#8217;ll get you the Zelle details at the front desk. Go ahead and finish your waiver below.";
+      } else if (visitPayment === "card") {
+        html = "Check out securely through our Zen Planner store &mdash; it opens in a new tab, so come back here to finish your waiver." +
+          '<br><a class="pay-link" href="' + (visitDuration === "week" ? ZEN_60 : ZEN_25) + '" target="_blank" rel="noopener">Pay ' + price + " by card &rarr;</a>";
+      } else if (visitPayment === "apparel") {
+        html = "Love it &mdash; pick out <b>$25</b> of Koda apparel at the front desk and your visit is covered. Finish your waiver below!";
+      }
+      box.innerHTML = html;
+      box.style.display = html ? "block" : "none";
     }
 
     // ── Minor toggle ──
@@ -385,6 +561,12 @@
       var isMinor = isMinorEl.checked;
       var guardianName = document.getElementById("guardianName").value.trim();
 
+      if (!visitType) return fail("Please start at the top: are you a local trying a class, or visiting from out of town?");
+      if (visitType === "dropin") {
+        if (!document.getElementById("visitFrom").value.trim()) return fail("Please tell us where you're from (top of the page).");
+        if (!visitDuration) return fail("Please choose how long you're in town (top of the page).");
+        if (visitDuration !== "longer" && !visitPayment) return fail("Please choose how you'd like to pay (top of the page).");
+      }
       if (!athleteName) return fail("Please enter the athlete's name.");
       if (!program) return fail("Please select a class program.");
       if (!email || !/^\S+@\S+\.\S+$/.test(email)) return fail("Please enter a valid e-mail address.");
@@ -395,6 +577,7 @@
       submitBtn.disabled = true;
       submitBtn.textContent = "Submitting…";
 
+      var isDropin = visitType === "dropin";
       var payload = {
         action: "waiverSubmit",
         athleteName: athleteName,
@@ -403,6 +586,10 @@
         referredBy: referredBy,
         isMinor: isMinor,
         guardianName: isMinor ? guardianName : "",
+        visitType: isDropin ? "Out-of-Town Drop-In" : "Local Trial Class",
+        visitFrom: isDropin ? document.getElementById("visitFrom").value.trim() : "",
+        visitDuration: isDropin && DURATIONS[visitDuration] ? DURATIONS[visitDuration].sheet : "",
+        visitPayment: isDropin ? (PAYMENTS[visitPayment] || "") : "",
         dateSigned: isoDate(now),
         signaturePng: canvas.toDataURL("image/png").split(",")[1],
         userAgent: navigator.userAgent,
@@ -423,6 +610,26 @@
               "Your signed waiver is on file with Koda CrossFit Iron View. A copy has been emailed to " + email + ".";
             document.getElementById("formCard").style.display = "none";
             document.getElementById("waiverText").style.display = "none";
+            document.getElementById("visitCard").style.display = "none";
+            var payNote = "";
+            if (isDropin) {
+              var sPrice = (DURATIONS[visitDuration] || {}).price || "";
+              if (visitDuration === "longer") {
+                payNote = "Since you&#8217;re in town for more than a week, chat with us at the front desk and we&#8217;ll set you up with the right membership.";
+              } else if (visitPayment === "card") {
+                payNote = "One last thing &mdash; if you haven&#8217;t paid yet, you can do it right here:" +
+                  '<br><a class="pay-link" href="' + (visitDuration === "week" ? ZEN_60 : ZEN_25) + '" target="_blank" rel="noopener">Pay ' + sPrice + " by card &rarr;</a>";
+              } else if (visitPayment === "venmo") {
+                payNote = "Don&#8217;t forget your <b>" + sPrice + "</b> via Venmo" + (VENMO_INFO ? " to <b>" + VENMO_INFO + "</b>." : " &mdash; we&#8217;ll get you the details at the front desk.");
+              } else if (visitPayment === "zelle") {
+                payNote = "Don&#8217;t forget your <b>" + sPrice + "</b> via Zelle" + (ZELLE_INFO ? " to <b>" + ZELLE_INFO + "</b>." : " &mdash; we&#8217;ll get you the details at the front desk.");
+              } else if (visitPayment === "apparel") {
+                payNote = "See the front desk to pick out your <b>$25</b> of Koda apparel &mdash; that covers your visit. 🎽";
+              }
+            }
+            var payEl = document.getElementById("successPay");
+            payEl.innerHTML = payNote;
+            payEl.style.display = payNote ? "block" : "none";
             document.getElementById("successCard").style.display = "block";
             window.scrollTo({ top: 0, behavior: "smooth" });
           } else {
