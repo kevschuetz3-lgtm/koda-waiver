@@ -288,6 +288,7 @@
           <option value="" disabled selected>Select a program…</option>
           <option>CrossFit</option>
           <option>Hyrox</option>
+          <option data-until="2026-09-14">Hyrox Simulation</option>
           <option>Women's Class</option>
           <option>Koda Kids/Teens</option>
           <option>Kratos (Oly)</option>
@@ -369,6 +370,25 @@
     function isoDate(d) {
       return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
     }
+
+    // ── Time-limited program options ──
+    // Any <option data-until="YYYY-MM-DD"> stays in the Class Program list through the END of that
+    // day (Mountain Time) and is removed from the page after that. To add another temporary option,
+    // just give it a data-until date.
+    function mtDate(d) { // YYYY-MM-DD for the given moment in America/Denver
+      try {
+        var parts = new Intl.DateTimeFormat("en-US", { timeZone: "America/Denver", year: "numeric", month: "2-digit", day: "2-digit" }).formatToParts(d);
+        var get = function (t) { return parts.filter(function (p) { return p.type === t; })[0].value; };
+        return get("year") + "-" + get("month") + "-" + get("day");
+      } catch (e) { return isoDate(d); }
+    }
+    function pruneExpiredOptions(today) {
+      var opts = document.querySelectorAll("option[data-until]");
+      Array.prototype.forEach.call(opts, function (o) {
+        if (today > o.getAttribute("data-until")) o.parentNode.removeChild(o);
+      });
+    }
+    pruneExpiredOptions(mtDate(now));
 
     // ── Visit type & out-of-town drop-in flow ──
     var ZEN_25 = "https://kodaironview.sites.zenplanner.com/retail-product.cfm?ProductId=2EE6B68B-42BF-4654-94B0-C14CA4DBB32A";
