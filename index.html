@@ -213,9 +213,10 @@
 
     <div class="card" id="visitCard">
       <h2>Welcome! What brings you in?</h2>
-      <div class="choice-grid">
+      <div class="choice-grid cols3" id="visitBtns">
         <button type="button" class="choice-btn" id="btnLocal">Local Trial Class<span class="sub">I live in the area and want to try Koda</span></button>
         <button type="button" class="choice-btn" id="btnDropin">Out-of-Town Drop-In<span class="sub">I&#8217;m visiting and want to work out</span></button>
+        <button type="button" class="choice-btn" id="btnSim" data-until="2026-09-14">Hyrox Simulation<span class="sub">I&#8217;m racing in the Sunday, Sept 13 event</span></button>
       </div>
 
       <div id="dropinQs" style="display:none">
@@ -282,13 +283,12 @@
         <input type="text" id="athleteName" autocomplete="name" placeholder="Full name">
       </div>
 
-      <div class="field">
+      <div class="field" id="programField">
         <label for="program">Class Program</label>
         <select id="program" required>
           <option value="" disabled selected>Select a program…</option>
           <option>CrossFit</option>
           <option>Hyrox</option>
-          <option data-until="2026-09-14">Hyrox Simulation</option>
           <option>Women's Class</option>
           <option>Koda Kids/Teens</option>
           <option>Kratos (Oly)</option>
@@ -371,10 +371,10 @@
       return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
     }
 
-    // ── Time-limited program options ──
-    // Any <option data-until="YYYY-MM-DD"> stays in the Class Program list through the END of that
-    // day (Mountain Time) and is removed from the page after that. To add another temporary option,
-    // just give it a data-until date.
+    // ── Time-limited choices ──
+    // Any element with data-until="YYYY-MM-DD" (e.g. the Hyrox Simulation button up top) stays on the
+    // page through the END of that day (Mountain Time) and is removed after that. To add another
+    // temporary choice, just give it a data-until date.
     function mtDate(d) { // YYYY-MM-DD for the given moment in America/Denver
       try {
         var parts = new Intl.DateTimeFormat("en-US", { timeZone: "America/Denver", year: "numeric", month: "2-digit", day: "2-digit" }).formatToParts(d);
@@ -382,13 +382,15 @@
         return get("year") + "-" + get("month") + "-" + get("day");
       } catch (e) { return isoDate(d); }
     }
-    function pruneExpiredOptions(today) {
-      var opts = document.querySelectorAll("option[data-until]");
-      Array.prototype.forEach.call(opts, function (o) {
-        if (today > o.getAttribute("data-until")) o.parentNode.removeChild(o);
+    function pruneExpired(today) {
+      var els = document.querySelectorAll("[data-until]");
+      Array.prototype.forEach.call(els, function (el) {
+        if (today > el.getAttribute("data-until")) el.parentNode.removeChild(el);
       });
+      var vb = document.getElementById("visitBtns"); // 3 columns only while all 3 choices are showing
+      vb.classList.toggle("cols3", vb.children.length >= 3);
     }
-    pruneExpiredOptions(mtDate(now));
+    pruneExpired(mtDate(now));
 
     // ── Visit type & out-of-town drop-in flow ──
     var ZEN_25 = "https://kodaironview.sites.zenplanner.com/retail-product.cfm?ProductId=2EE6B68B-42BF-4654-94B0-C14CA4DBB32A";
@@ -406,18 +408,24 @@
       "longer": { sheet: "Longer than a week", price: "" }
     };
     var PAYMENTS = { venmo: "Venmo", zelle: "Zelle", card: "Credit Card (Zen Planner)", apparel: "Apparel Purchase" };
+    var SIM = { program: "Hyrox Simulation", visitType: "Hyrox Simulation (Sept 13, 2026)" }; // what Sim signers send
 
     function selVisit(type) {
       visitType = type;
       document.getElementById("btnLocal").classList.toggle("sel", type === "local");
       document.getElementById("btnDropin").classList.toggle("sel", type === "dropin");
+      var simBtn = document.getElementById("btnSim");
+      if (simBtn) simBtn.classList.toggle("sel", type === "sim");
       document.getElementById("dropinQs").style.display = type === "dropin" ? "block" : "none";
+      // Hyrox Sim signers don't pick a class program — it's filled in for them
+      document.getElementById("programField").style.display = type === "sim" ? "none" : "block";
       document.getElementById("waiverText").style.display = "block";
       document.getElementById("formCard").style.display = "block";
       initCanvas(); // canvas was hidden (zero-size) until now
     }
     document.getElementById("btnLocal").addEventListener("click", function () { selVisit("local"); });
     document.getElementById("btnDropin").addEventListener("click", function () { selVisit("dropin"); });
+    if (document.getElementById("btnSim")) document.getElementById("btnSim").addEventListener("click", function () { selVisit("sim"); });
 
     var durationBtns = document.querySelectorAll("#durationBtns .choice-btn");
     Array.prototype.forEach.call(durationBtns, function (b) {
@@ -575,13 +583,13 @@
       document.getElementById("errMsg").style.display = "none";
 
       var athleteName = document.getElementById("athleteName").value.trim();
-      var program = document.getElementById("program").value;
+      var program = visitType === "sim" ? SIM.program : document.getElementById("program").value;
       var email = document.getElementById("email").value.trim();
       var referredBy = document.getElementById("referredBy").value.trim();
       var isMinor = isMinorEl.checked;
       var guardianName = document.getElementById("guardianName").value.trim();
 
-      if (!visitType) return fail("Please start at the top: are you a local trying a class, or visiting from out of town?");
+      if (!visitType) return fail("Please start at the top and tell us what brings you in.");
       if (visitType === "dropin") {
         if (!document.getElementById("visitFrom").value.trim()) return fail("Please tell us where you're from (top of the page).");
         if (!visitDuration) return fail("Please choose how long you're in town (top of the page).");
@@ -606,7 +614,7 @@
         referredBy: referredBy,
         isMinor: isMinor,
         guardianName: isMinor ? guardianName : "",
-        visitType: isDropin ? "Out-of-Town Drop-In" : "Local Trial Class",
+        visitType: isDropin ? "Out-of-Town Drop-In" : (visitType === "sim" ? SIM.visitType : "Local Trial Class"),
         visitFrom: isDropin ? document.getElementById("visitFrom").value.trim() : "",
         visitDuration: isDropin && DURATIONS[visitDuration] ? DURATIONS[visitDuration].sheet : "",
         visitPayment: isDropin ? (PAYMENTS[visitPayment] || "") : "",
@@ -647,6 +655,7 @@
                 payNote = "See the front desk to pick out your <b>$25</b> of Koda apparel &mdash; that covers your visit. 🎽";
               }
             }
+            if (visitType === "sim") payNote = "See you Sunday, September 13 at the Hyrox Simulation! 🏁";
             var payEl = document.getElementById("successPay");
             payEl.innerHTML = payNote;
             payEl.style.display = payNote ? "block" : "none";
