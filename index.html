@@ -213,10 +213,16 @@
 
     <div class="card" id="visitCard">
       <h2>Welcome! What brings you in?</h2>
-      <div class="choice-grid cols3" id="visitBtns">
+      <div class="choice-grid" id="visitBtns">
         <button type="button" class="choice-btn" id="btnLocal">Local Trial Class<span class="sub">I live in the area and want to try Koda</span></button>
         <button type="button" class="choice-btn" id="btnDropin">Out-of-Town Drop-In<span class="sub">I&#8217;m visiting and want to work out</span></button>
+        <!-- Hyrox Simulation choice — REMOVED 2026-09-14 after the Sept 13 event (Kevin plans to bring it back for the next Sim).
+             To re-enable: uncomment the button below, set data-until to the event date (it auto-hides after the END of
+             that day, Mountain Time), update the sub-label, then update the SIM const and the "See you Sunday…" success
+             message in the script below. Everything else (hiding the Class Program field, program = "Hyrox Simulation",
+             the sheet/email/PDF visit type) still works as-is.
         <button type="button" class="choice-btn" id="btnSim" data-until="2026-09-14">Hyrox Simulation<span class="sub">I&#8217;m racing in the Sunday, Sept 13 event</span></button>
+        -->
       </div>
 
       <div id="dropinQs" style="display:none">
@@ -372,7 +378,7 @@
     }
 
     // ── Time-limited choices ──
-    // Any element with data-until="YYYY-MM-DD" (e.g. the Hyrox Simulation button up top) stays on the
+    // Any element with data-until="YYYY-MM-DD" (e.g. the Hyrox Simulation button template up top) stays on the
     // page through the END of that day (Mountain Time) and is removed after that. To add another
     // temporary choice, just give it a data-until date.
     function mtDate(d) { // YYYY-MM-DD for the given moment in America/Denver
@@ -408,7 +414,7 @@
       "longer": { sheet: "Longer than a week", price: "" }
     };
     var PAYMENTS = { venmo: "Venmo", zelle: "Zelle", card: "Credit Card (Zen Planner)", apparel: "Apparel Purchase" };
-    var SIM = { program: "Hyrox Simulation", visitType: "Hyrox Simulation (Sept 13, 2026)" }; // what Sim signers send
+    var SIM = { program: "Hyrox Simulation", visitType: "Hyrox Simulation (Sept 13, 2026)" }; // what Sim signers send (dormant while #btnSim is commented out — update the date when re-enabling)
 
     function selVisit(type) {
       visitType = type;
