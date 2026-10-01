@@ -216,6 +216,8 @@
       <div class="choice-grid" id="visitBtns">
         <button type="button" class="choice-btn" id="btnLocal">Local Trial Class<span class="sub">I live in the area and want to try Koda</span></button>
         <button type="button" class="choice-btn" id="btnDropin">Out-of-Town Drop-In<span class="sub">I&#8217;m visiting and want to work out</span></button>
+        <!-- Koda Iron Games choice — added 2026-10-01 for the Oct 3–4 event; auto-hides after the END of Sun Oct 4 (MT). -->
+        <button type="button" class="choice-btn" id="btnIG" data-until="2026-10-04">Koda Iron Games<span class="sub">I&#8217;m competing in the Iron Games, Oct 3&#8211;4</span></button>
         <!-- Hyrox Simulation choice — REMOVED 2026-09-14 after the Sept 13 event (Kevin plans to bring it back for the next Sim).
              To re-enable: uncomment the button below, set data-until to the event date (it auto-hides after the END of
              that day, Mountain Time), update the sub-label, then update the SIM const and the "See you Sunday…" success
@@ -415,6 +417,8 @@
     };
     var PAYMENTS = { venmo: "Venmo", zelle: "Zelle", card: "Credit Card (Zen Planner)", apparel: "Apparel Purchase" };
     var SIM = { program: "Hyrox Simulation", visitType: "Hyrox Simulation (Sept 13, 2026)" }; // what Sim signers send (dormant while #btnSim is commented out — update the date when re-enabling)
+    var IG = { program: "Koda Iron Games", visitType: "Koda Iron Games (Oct 3-4, 2026)" }; // what Iron Games athletes send (#btnIG, auto-hides after Oct 4)
+    var EVENTS = { sim: SIM, ig: IG }; // event-style visit types: no class program, fixed program/visit type
 
     function selVisit(type) {
       visitType = type;
@@ -422,9 +426,11 @@
       document.getElementById("btnDropin").classList.toggle("sel", type === "dropin");
       var simBtn = document.getElementById("btnSim");
       if (simBtn) simBtn.classList.toggle("sel", type === "sim");
+      var igBtn = document.getElementById("btnIG");
+      if (igBtn) igBtn.classList.toggle("sel", type === "ig");
       document.getElementById("dropinQs").style.display = type === "dropin" ? "block" : "none";
-      // Hyrox Sim signers don't pick a class program — it's filled in for them
-      document.getElementById("programField").style.display = type === "sim" ? "none" : "block";
+      // Event signers (Hyrox Sim, Iron Games) don't pick a class program — it's filled in for them
+      document.getElementById("programField").style.display = EVENTS[type] ? "none" : "block";
       document.getElementById("waiverText").style.display = "block";
       document.getElementById("formCard").style.display = "block";
       initCanvas(); // canvas was hidden (zero-size) until now
@@ -432,6 +438,7 @@
     document.getElementById("btnLocal").addEventListener("click", function () { selVisit("local"); });
     document.getElementById("btnDropin").addEventListener("click", function () { selVisit("dropin"); });
     if (document.getElementById("btnSim")) document.getElementById("btnSim").addEventListener("click", function () { selVisit("sim"); });
+    if (document.getElementById("btnIG")) document.getElementById("btnIG").addEventListener("click", function () { selVisit("ig"); });
 
     var durationBtns = document.querySelectorAll("#durationBtns .choice-btn");
     Array.prototype.forEach.call(durationBtns, function (b) {
@@ -589,7 +596,7 @@
       document.getElementById("errMsg").style.display = "none";
 
       var athleteName = document.getElementById("athleteName").value.trim();
-      var program = visitType === "sim" ? SIM.program : document.getElementById("program").value;
+      var program = EVENTS[visitType] ? EVENTS[visitType].program : document.getElementById("program").value;
       var email = document.getElementById("email").value.trim();
       var referredBy = document.getElementById("referredBy").value.trim();
       var isMinor = isMinorEl.checked;
@@ -620,7 +627,7 @@
         referredBy: referredBy,
         isMinor: isMinor,
         guardianName: isMinor ? guardianName : "",
-        visitType: isDropin ? "Out-of-Town Drop-In" : (visitType === "sim" ? SIM.visitType : "Local Trial Class"),
+        visitType: isDropin ? "Out-of-Town Drop-In" : (EVENTS[visitType] ? EVENTS[visitType].visitType : "Local Trial Class"),
         visitFrom: isDropin ? document.getElementById("visitFrom").value.trim() : "",
         visitDuration: isDropin && DURATIONS[visitDuration] ? DURATIONS[visitDuration].sheet : "",
         visitPayment: isDropin ? (PAYMENTS[visitPayment] || "") : "",
@@ -662,6 +669,7 @@
               }
             }
             if (visitType === "sim") payNote = "See you Sunday, September 13 at the Hyrox Simulation! 🏁";
+            if (visitType === "ig") payNote = "You&#8217;re all set for the Koda Iron Games &mdash; see you October 3&#8211;4! 🏆";
             var payEl = document.getElementById("successPay");
             payEl.innerHTML = payNote;
             payEl.style.display = payNote ? "block" : "none";
