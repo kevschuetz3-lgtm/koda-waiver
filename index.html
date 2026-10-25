@@ -218,13 +218,11 @@
         <button type="button" class="choice-btn" id="btnDropin">Out-of-Town Drop-In<span class="sub">I&#8217;m visiting and want to work out</span></button>
         <!-- Koda Iron Games choice — added 2026-10-01 for the Oct 3–4 event; auto-hides after the END of Sun Oct 4 (MT). -->
         <button type="button" class="choice-btn" id="btnIG" data-until="2026-10-04">Koda Iron Games<span class="sub">I&#8217;m competing in the Iron Games, Oct 3&#8211;4</span></button>
-        <!-- Hyrox Simulation choice — REMOVED 2026-09-14 after the Sept 13 event (Kevin plans to bring it back for the next Sim).
-             To re-enable: uncomment the button below, set data-until to the event date (it auto-hides after the END of
-             that day, Mountain Time), update the sub-label, then update the SIM const and the "See you Sunday…" success
-             message in the script below. Everything else (hiding the Class Program field, program = "Hyrox Simulation",
-             the sheet/email/PDF visit type) still works as-is.
-        <button type="button" class="choice-btn" id="btnSim" data-until="2026-09-14">Hyrox Simulation<span class="sub">I&#8217;m racing in the Sunday, Sept 13 event</span></button>
-        -->
+        <!-- Hyrox Simulation choice — re-added 2026-10-25 for that day's Sim only; auto-hides after the END of Sun Oct 25 (MT).
+             For the next Sim: set data-until to the event date, update the sub-label, then update the SIM const and the
+             Sim success message in the script below. Everything else (hiding the Class Program field, program = "Hyrox
+             Simulation", the sheet/email/PDF visit type) still works as-is. -->
+        <button type="button" class="choice-btn" id="btnSim" data-until="2026-10-25">Hyrox Simulation<span class="sub">I&#8217;m racing in today&#8217;s Sunday, Oct 25 event</span></button>
       </div>
 
       <div id="dropinQs" style="display:none">
@@ -416,7 +414,7 @@
       "longer": { sheet: "Longer than a week", price: "" }
     };
     var PAYMENTS = { venmo: "Venmo", zelle: "Zelle", card: "Credit Card (Zen Planner)", apparel: "Apparel Purchase" };
-    var SIM = { program: "Hyrox Simulation", visitType: "Hyrox Simulation (Sept 13, 2026)" }; // what Sim signers send (dormant while #btnSim is commented out — update the date when re-enabling)
+    var SIM = { program: "Hyrox Simulation", visitType: "Hyrox Simulation (Oct 25, 2026)" }; // what Sim signers send (#btnSim, auto-hides after Oct 25)
     var IG = { program: "Koda Iron Games", visitType: "Koda Iron Games (Oct 3-4, 2026)" }; // what Iron Games athletes send (#btnIG, auto-hides after Oct 4)
     var EVENTS = { sim: SIM, ig: IG }; // event-style visit types: no class program, fixed program/visit type
 
@@ -668,7 +666,7 @@
                 payNote = "See the front desk to pick out your <b>$25</b> of Koda apparel &mdash; that covers your visit. 🎽";
               }
             }
-            if (visitType === "sim") payNote = "See you Sunday, September 13 at the Hyrox Simulation! 🏁";
+            if (visitType === "sim") payNote = "You&#8217;re all set for today&#8217;s Hyrox Simulation &mdash; good luck out there! 🏁";
             if (visitType === "ig") payNote = "You&#8217;re all set for the Koda Iron Games &mdash; see you October 3&#8211;4! 🏆";
             var payEl = document.getElementById("successPay");
             payEl.innerHTML = payNote;
