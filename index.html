@@ -216,6 +216,9 @@
       <div class="choice-grid" id="visitBtns">
         <button type="button" class="choice-btn" id="btnLocal">Local Trial Class<span class="sub">I live in the area and want to try Koda</span></button>
         <button type="button" class="choice-btn" id="btnDropin">Out-of-Town Drop-In<span class="sub">I&#8217;m visiting and want to work out</span></button>
+        <!-- Veterans Day event choice — added 2026-11-11 for that day only; auto-hides after the END of Wed Nov 11 (MT).
+             Picking it hides the Class Program field and sends the VET program/visit type in the script below. -->
+        <button type="button" class="choice-btn" id="btnVet" data-until="2026-11-11">Veterans Day Event w/ Josh Bridges<span class="sub">I&#8217;m joining today&#8217;s event &mdash; Wed, Nov 11</span></button>
         <!-- Koda Iron Games choice — added 2026-10-01 for the Oct 3–4 event; auto-hides after the END of Sun Oct 4 (MT). -->
         <button type="button" class="choice-btn" id="btnIG" data-until="2026-10-04">Koda Iron Games<span class="sub">I&#8217;m competing in the Iron Games, Oct 3&#8211;4</span></button>
         <!-- Hyrox Simulation choice — re-added 2026-10-25 for that day's Sim only; auto-hides after the END of Sun Oct 25 (MT).
@@ -416,7 +419,8 @@
     var PAYMENTS = { venmo: "Venmo", zelle: "Zelle", card: "Credit Card (Zen Planner)" };
     var SIM = { program: "Hyrox Simulation", visitType: "Hyrox Simulation (Oct 25, 2026)" }; // what Sim signers send (#btnSim, auto-hides after Oct 25)
     var IG = { program: "Koda Iron Games", visitType: "Koda Iron Games (Oct 3-4, 2026)" }; // what Iron Games athletes send (#btnIG, auto-hides after Oct 4)
-    var EVENTS = { sim: SIM, ig: IG }; // event-style visit types: no class program, fixed program/visit type
+    var VET = { program: "Veterans Day Event w/ Josh Bridges", visitType: "Veterans Day Event w/ Josh Bridges (Nov 11, 2026)" }; // #btnVet, auto-hides after Nov 11
+    var EVENTS = { sim: SIM, ig: IG, vet: VET }; // event-style visit types: no class program, fixed program/visit type
 
     function selVisit(type) {
       visitType = type;
@@ -426,6 +430,8 @@
       if (simBtn) simBtn.classList.toggle("sel", type === "sim");
       var igBtn = document.getElementById("btnIG");
       if (igBtn) igBtn.classList.toggle("sel", type === "ig");
+      var vetBtn = document.getElementById("btnVet");
+      if (vetBtn) vetBtn.classList.toggle("sel", type === "vet");
       document.getElementById("dropinQs").style.display = type === "dropin" ? "block" : "none";
       // Event signers (Hyrox Sim, Iron Games) don't pick a class program — it's filled in for them
       document.getElementById("programField").style.display = EVENTS[type] ? "none" : "block";
@@ -437,6 +443,7 @@
     document.getElementById("btnDropin").addEventListener("click", function () { selVisit("dropin"); });
     if (document.getElementById("btnSim")) document.getElementById("btnSim").addEventListener("click", function () { selVisit("sim"); });
     if (document.getElementById("btnIG")) document.getElementById("btnIG").addEventListener("click", function () { selVisit("ig"); });
+    if (document.getElementById("btnVet")) document.getElementById("btnVet").addEventListener("click", function () { selVisit("vet"); });
 
     var durationBtns = document.querySelectorAll("#durationBtns .choice-btn");
     Array.prototype.forEach.call(durationBtns, function (b) {
@@ -662,6 +669,7 @@
             }
             if (visitType === "sim") payNote = "You&#8217;re all set for today&#8217;s Hyrox Simulation &mdash; good luck out there! 🏁";
             if (visitType === "ig") payNote = "You&#8217;re all set for the Koda Iron Games &mdash; see you October 3&#8211;4! 🏆";
+            if (visitType === "vet") payNote = "You&#8217;re all set for today&#8217;s Veterans Day event with Josh Bridges &mdash; thank you to everyone who has served. 🇺🇸";
             var payEl = document.getElementById("successPay");
             payEl.innerHTML = payNote;
             payEl.style.display = payNote ? "block" : "none";
