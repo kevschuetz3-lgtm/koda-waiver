@@ -55,7 +55,7 @@
     label { font-weight: 600; font-size: 0.9rem; display: block; margin-bottom: 6px; color: #fff; }
     .optional { color: #8a90a0; font-weight: 400; }
 
-    input[type=text], input[type=email], select {
+    input[type=text], input[type=email], select, textarea {
       width: 100%;
       padding: 12px 14px;
       border: 1px solid #444;
@@ -63,8 +63,10 @@
       background: #1a1a2e;
       color: #fff;
       font-size: 16px;
+      font-family: inherit;
     }
-    input[type=text]:focus, input[type=email]:focus, select:focus { outline: none; border-color: #e0b452; }
+    input[type=text]:focus, input[type=email]:focus, select:focus, textarea:focus { outline: none; border-color: #e0b452; }
+    textarea { resize: vertical; min-height: 68px; line-height: 1.45; }
 
     select {
       appearance: none;
@@ -93,6 +95,29 @@
     .check input { width: 20px; height: 20px; margin-top: 1px; flex: none; accent-color: #e0b452; cursor: pointer; }
 
     #guardianField { display: none; }
+
+    /* ── Steps ── */
+    .stepbar {
+      text-align: center;
+      color: #cbb27a;
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin: -12px 0 16px;
+    }
+    .back-btn {
+      background: none;
+      border: none;
+      color: #aaa;
+      font-size: 0.92rem;
+      font-family: inherit;
+      cursor: pointer;
+      padding: 6px 2px;
+      margin-bottom: 10px;
+    }
+    .back-btn:hover { color: #e0b452; }
+    .card p.signing-for { text-align: center; color: #aaa; font-size: 0.88rem; margin-bottom: 16px; }
 
     /* ── Signature pad ── */
     .sig-head { display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 6px; }
@@ -185,6 +210,23 @@
     }
     .pay-link:hover { background: #eac267; }
 
+    /* ── PAR-Q+ screening (Women's Class) ── */
+    .card p.parq-intro { text-align: center; color: #aaa; font-size: 0.88rem; }
+    .q { padding: 18px 0; border-top: 1px solid #2a3558; }
+    .q:last-child { padding-bottom: 20px; }
+    .q-text { color: #fff; font-weight: 600; font-size: 0.95rem; line-height: 1.55; }
+    .q-note { color: #9aa1ad; font-size: 0.86rem; line-height: 1.5; margin-top: 6px; }
+    .yn { display: flex; gap: 10px; margin-top: 12px; }
+    .yn .yn-btn { flex: 1; max-width: 150px; padding: 11px 12px; }
+    .q-more { margin-top: 14px; padding: 14px 16px; background: #1a1a2e; border-radius: 10px; }
+    .q-more label { margin-bottom: 8px; }
+    .q-more textarea { background: #16213e; }
+    .q-sub { display: flex; align-items: center; justify-content: space-between; gap: 12px; color: #fff; font-weight: 600; font-size: 0.92rem; }
+    .q-sub + .q-sub { margin-top: 10px; }
+    .q-sub .yn { margin-top: 0; flex: none; }
+    .q-sub .yn .yn-btn { flex: none; width: 76px; padding: 9px 8px; background: #16213e; }
+    .q-sub .yn .yn-btn.sel { background: rgba(224, 180, 82, 0.14); }
+
     /* ── Success ── */
     #successCard { display: none; text-align: center; padding: 44px 22px; }
     #successCard .big { font-size: 3rem; margin-bottom: 10px; }
@@ -210,149 +252,219 @@
     <img class="logo" src="koda-logo.png" alt="Koda CrossFit">
     <h1>Koda CrossFit Iron View</h1>
     <div class="subtitle">Waiver and Release</div>
+    <div class="stepbar" id="stepBar" style="display:none"></div>
 
-    <div class="card" id="visitCard">
-      <h2>Welcome! What brings you in?</h2>
-      <div class="choice-grid" id="visitBtns">
-        <button type="button" class="choice-btn" id="btnLocal">Local Trial Class<span class="sub">I live in the area and want to try Koda</span></button>
-        <button type="button" class="choice-btn" id="btnDropin">Out-of-Town Drop-In<span class="sub">I&#8217;m visiting and want to work out</span></button>
-        <!-- Veterans Day event choice — added 2026-11-11 for that day only; auto-hides after the END of Wed Nov 11 (MT).
-             Picking it hides the Class Program field and sends the VET program/visit type in the script below. -->
-        <button type="button" class="choice-btn" id="btnVet" data-until="2026-11-11">Veterans Day Event w/ Josh Bridges<span class="sub">I&#8217;m joining today&#8217;s event &mdash; Wed, Nov 11</span></button>
-        <!-- Koda Iron Games choice — added 2026-10-01 for the Oct 3–4 event; auto-hides after the END of Sun Oct 4 (MT). -->
-        <button type="button" class="choice-btn" id="btnIG" data-until="2026-10-04">Koda Iron Games<span class="sub">I&#8217;m competing in the Iron Games, Oct 3&#8211;4</span></button>
-        <!-- Hyrox Simulation choice — re-added 2026-10-25 for that day's Sim only; auto-hides after the END of Sun Oct 25 (MT).
-             For the next Sim: set data-until to the event date, update the sub-label, then update the SIM const and the
-             Sim success message in the script below. Everything else (hiding the Class Program field, program = "Hyrox
-             Simulation", the sheet/email/PDF visit type) still works as-is. -->
-        <button type="button" class="choice-btn" id="btnSim" data-until="2026-10-25">Hyrox Simulation<span class="sub">I&#8217;m racing in today&#8217;s Sunday, Oct 25 event</span></button>
-      </div>
-
-      <div id="dropinQs" style="display:none">
-        <div class="field" style="margin-top:18px">
-          <label for="visitFrom">Where are you from?</label>
-          <input type="text" id="visitFrom" placeholder="City, state (or country)">
+    <!-- ══ Page 1: what brings you in + your information ══
+         The waiver itself is on page 2, because which waiver you sign depends on the program you pick here. -->
+    <div id="pageInfo">
+      <div class="card" id="visitCard">
+        <h2>Welcome! What brings you in?</h2>
+        <div class="choice-grid" id="visitBtns">
+          <button type="button" class="choice-btn" id="btnLocal">Local Trial Class<span class="sub">I live in the area and want to try Koda</span></button>
+          <button type="button" class="choice-btn" id="btnDropin">Out-of-Town Drop-In<span class="sub">I&#8217;m visiting and want to work out</span></button>
+          <!-- Veterans Day event choice — added 2026-11-11 for that day only; auto-hides after the END of Wed Nov 11 (MT).
+               Picking it hides the Class Program field and sends the VET program/visit type in the script below. -->
+          <button type="button" class="choice-btn" id="btnVet" data-until="2026-11-11">Veterans Day Event w/ Josh Bridges<span class="sub">I&#8217;m joining today&#8217;s event &mdash; Wed, Nov 11</span></button>
+          <!-- Koda Iron Games choice — added 2026-10-01 for the Oct 3–4 event; auto-hides after the END of Sun Oct 4 (MT). -->
+          <button type="button" class="choice-btn" id="btnIG" data-until="2026-10-04">Koda Iron Games<span class="sub">I&#8217;m competing in the Iron Games, Oct 3&#8211;4</span></button>
+          <!-- Hyrox Simulation choice — re-added 2026-10-25 for that day's Sim only; auto-hides after the END of Sun Oct 25 (MT).
+               For the next Sim: set data-until to the event date, update the sub-label, then update the SIM const and the
+               Sim success message in the script below. Everything else (hiding the Class Program field, program = "Hyrox
+               Simulation", the sheet/email/PDF visit type) still works as-is. -->
+          <button type="button" class="choice-btn" id="btnSim" data-until="2026-10-25">Hyrox Simulation<span class="sub">I&#8217;m racing in today&#8217;s Sunday, Oct 25 event</span></button>
         </div>
 
+        <div id="dropinQs" style="display:none">
+          <div class="field" style="margin-top:18px">
+            <label for="visitFrom">Where are you from?</label>
+            <input type="text" id="visitFrom" placeholder="City, state (or country)">
+          </div>
+
+          <div class="field">
+            <label>How long are you in town?</label>
+            <div class="choice-grid cols3" id="durationBtns">
+              <button type="button" class="choice-btn" data-duration="1visit">1 Visit<span class="sub">$25 &mdash; or an apparel purchase</span></button>
+              <button type="button" class="choice-btn" data-duration="week">Unlimited Week<span class="sub">$60</span></button>
+              <button type="button" class="choice-btn" data-duration="longer">Longer<span class="sub">More than a week</span></button>
+            </div>
+          </div>
+
+          <div class="field" id="paymentField" style="display:none; margin-bottom:0">
+            <label>How would you like to pay?</label>
+            <div class="choice-grid" id="paymentBtns"></div>
+            <div id="payBox" class="pay-box" style="display:none; margin-top:12px"></div>
+          </div>
+
+          <div id="longerBox" class="pay-box" style="display:none">
+            Staying more than a week? Awesome &mdash; we&#8217;ll set you up with the membership option that fits your stay. Chat with us at the front desk, or email <a href="mailto:kodaironview@gmail.com">kodaironview@gmail.com</a>. Go ahead and finish your waiver below. 💪
+          </div>
+        </div>
+      </div>
+
+      <div class="card" id="infoCard" style="display:none">
+        <h2>Your Information</h2>
+
         <div class="field">
-          <label>How long are you in town?</label>
-          <div class="choice-grid cols3" id="durationBtns">
-            <button type="button" class="choice-btn" data-duration="1visit">1 Visit<span class="sub">$25 &mdash; or an apparel purchase</span></button>
-            <button type="button" class="choice-btn" data-duration="week">Unlimited Week<span class="sub">$60</span></button>
-            <button type="button" class="choice-btn" data-duration="longer">Longer<span class="sub">More than a week</span></button>
+          <label for="athleteName">Athlete's Name (printed)</label>
+          <input type="text" id="athleteName" autocomplete="name" placeholder="Full name">
+        </div>
+
+        <div class="field" id="programField">
+          <label for="program">Class Program</label>
+          <select id="program" required>
+            <option value="" disabled selected>Select a program…</option>
+            <option>CrossFit</option>
+            <option>Hyrox</option>
+            <option>Women's Class</option>
+            <option>Koda Kids/Teens</option>
+            <option>Kratos (Oly)</option>
+            <option>KodaFit</option>
+          </select>
+        </div>
+
+        <div class="row2">
+          <div class="field">
+            <label for="email">E-mail Address for Follow Up</label>
+            <input type="email" id="email" autocomplete="email" placeholder="you@example.com">
+          </div>
+          <div class="field">
+            <label for="referredBy">Referred By <span class="optional">(optional)</span></label>
+            <input type="text" id="referredBy" placeholder="Friend, Google, Instagram…">
           </div>
         </div>
 
-        <div class="field" id="paymentField" style="display:none; margin-bottom:0">
-          <label>How would you like to pay?</label>
-          <div class="choice-grid" id="paymentBtns"></div>
-          <div id="payBox" class="pay-box" style="display:none; margin-top:12px"></div>
+        <div class="field">
+          <label class="check">
+            <input type="checkbox" id="isMinor">
+            <span>The athlete is under 18 — a parent or guardian is signing this waiver.</span>
+          </label>
         </div>
 
-        <div id="longerBox" class="pay-box" style="display:none">
-          Staying more than a week? Awesome &mdash; we&#8217;ll set you up with the membership option that fits your stay. Chat with us at the front desk, or email <a href="mailto:kodaironview@gmail.com">kodaironview@gmail.com</a>. Go ahead and finish your waiver below. 💪
+        <div class="field" id="guardianField">
+          <label for="guardianName">Parent/Guardian Name (printed)</label>
+          <input type="text" id="guardianName" placeholder="Parent or guardian full name">
         </div>
+
+        <button type="button" class="submit-btn" id="toWaiverBtn">Continue to Waiver</button>
+        <div class="err" id="errInfo"></div>
       </div>
     </div>
 
-    <div id="waiverText" style="display:none">
-      <div class="card">
-        <p>This form is an important legal document. It explains the risks you are assuming by participation in classes and workouts at Koda CrossFit Iron View. It is important that you read and understand it completely. After you have done so, please fill out and execute at the bottom.</p>
+    <!-- ══ Page 2: the waiver for the chosen program, then agree + sign ══ -->
+    <div id="pageWaiver" style="display:none">
+      <button type="button" class="back-btn" id="backToInfo">&larr; Back to your information</button>
+
+      <!-- Koda waiver: every program except Women's Class. Same wording as the paper waiver;
+           the signed PDF is built from a matching copy in the backend (buildWaiverPdfHtml_). -->
+      <div id="waiverKoda">
+        <div class="card">
+          <p>This form is an important legal document. It explains the risks you are assuming by participation in classes and workouts at Koda CrossFit Iron View. It is important that you read and understand it completely. After you have done so, please fill out and execute at the bottom.</p>
+        </div>
+
+        <div class="card">
+          <h2>Waiver, Informed Consent, and Covenant Not to Sue</h2>
+          <p>I have willingly volunteered to participate in physical conditioning and activities under the direction of Koda CrossFit Iron View, which will include, but may not be limited to, weight, endurance, and/or resistance training. I do here and forever release and discharge and hereby hold harmless Koda CrossFit Iron View and its respective agents, heirs, assigns, contractors, volunteers, sponsors, judges, and employees from any and all claims, demands, damages, rights of action, or causes of action, present or future, arising out of or connected with my participation in activities at Koda CrossFit Iron View, including any injuries resulting therefrom. <span class="caps">THIS WAIVER AND RELEASE OF LIABILITY INCLUDES, WITHOUT LIMITATION, INJURIES WHICH MAY OCCUR AS A RESULT OF (1) EQUIPMENT THAT MAY MALFUNCTION OR BREAK, (2) ANY SLIP, FALL, OR DROPPING OF EQUIPMENT, AND (3) NEGLIGENT INSTRUCTION OR SUPERVISION.</span></p>
+        </div>
+
+        <div class="card">
+          <h2>Assumption of Risk</h2>
+          <p>I recognize that exercise might be difficult and strenuous and that there could be dangers inherent in exercise for some individuals. I acknowledge that certain unusual physical changes during exercise may occur. These changes include abnormal blood pressure, fainting, disorders in heartbeat, heart attack, and, in rare instances, death.</p>
+          <p>I understand that as a result of my willing participation in activities at Koda CrossFit Iron View, I could suffer an injury or physical disorder that could result in my becoming partially or totally disabled and incapable of performing any gainful employment or having a normal social life.</p>
+          <p>As a willing participant in activities at Koda CrossFit Iron View, I represent and warrant that I have been examined by a competent physician who has determined that I am physically capable of participating in such activities.</p>
+          <p>I acknowledge and agree that I assume the risks associated with any and all activities and/or exercises in which I participate. I understand and acknowledge that I may terminate my participation in any physical activity at any time for any reason I deem necessary.</p>
+          <p><span class="caps">I ACKNOWLEDGE THAT I HAVE READ THIS WAIVER AND RELEASE AND FULLY UNDERSTAND THAT IT IS A RELEASE OF LIABILITY. BY SIGNING THIS DOCUMENT, I AM WAIVING ANY RIGHT I OR MY SUCCESSORS MIGHT HAVE TO BRING LEGAL ACTION OR ASSERT A CLAIM AGAINST KODA CROSSFIT IRON VIEW AND/OR THE OTHERS REFERRED TO IN THIS DOCUMENT FOR ANY NEGLIGENCE.</span></p>
+        </div>
+
+        <div class="card">
+          <h2>Photography and Audio/Video Recording</h2>
+          <p>I hereby give Koda CrossFit Iron View permission to video tape, photograph, and record my image and/or my likeness during my participation in any activities at Koda CrossFit Iron View. I also understand that giving this permission is in no way an endorsement of Koda CrossFit Iron View or any products distributed by Koda CrossFit Iron View.</p>
+        </div>
+
+        <div class="card">
+          <p><span class="caps">I HAVE CAREFULLY READ THIS DOCUMENT AND I FULLY UNDERSTAND ITS CONTENTS. I AM AWARE THAT THIS IS A RELEASE OF LIABILITY AND A CONTRACT BETWEEN ME AND KODA CROSSFIT IRON VIEW.</span></p>
+        </div>
       </div>
 
-      <div class="card">
-        <h2>Waiver, Informed Consent, and Covenant Not to Sue</h2>
-        <p>I have willingly volunteered to participate in physical conditioning and activities under the direction of Koda CrossFit Iron View, which will include, but may not be limited to, weight, endurance, and/or resistance training. I do here and forever release and discharge and hereby hold harmless Koda CrossFit Iron View and its respective agents, heirs, assigns, contractors, volunteers, sponsors, judges, and employees from any and all claims, demands, damages, rights of action, or causes of action, present or future, arising out of or connected with my participation in activities at Koda CrossFit Iron View, including any injuries resulting therefrom. <span class="caps">THIS WAIVER AND RELEASE OF LIABILITY INCLUDES, WITHOUT LIMITATION, INJURIES WHICH MAY OCCUR AS A RESULT OF (1) EQUIPMENT THAT MAY MALFUNCTION OR BREAK, (2) ANY SLIP, FALL, OR DROPPING OF EQUIPMENT, AND (3) NEGLIGENT INSTRUCTION OR SUPERVISION.</span></p>
+      <!-- Combined Koda + Mend waiver: Women's Class only (added 2026-11-20).
+           Base = Mend's "Women's Strength Class Informed Consent, Waiver and Release" (Kristin Carpenter, Sept 2025), which
+           names both Koda CrossFit Iron View and MEND PLLC. Kept from the Koda waiver, because Mend's version leaves them out:
+           (1) "and incapable of performing any gainful employment or having a normal social life", (2) the Photography and
+           Audio/Video Recording section, (3) the closing "release of liability and a contract" sentence, now naming both.
+           The signed PDF is built from a matching copy in the backend (buildWaiverPdfHtml_, combined). -->
+      <div id="waiverWomens" style="display:none">
+        <div class="card">
+          <h2>Women's Strength Class Informed Consent, Waiver and Release</h2>
+          <p>This form is an important legal document. It explains the risks you are assuming by participation in classes and workouts at Koda CrossFit Iron View and/or MEND PLLC. It is important that you read and understand it completely. After you have done so, please complete the electronic signature.</p>
+        </div>
+
+        <div class="card">
+          <h2>Waiver, Informed Consent, and Covenant Not to Sue</h2>
+          <p>I have willingly volunteered to participate in physical conditioning and activities under the direction of Koda CrossFit Iron View and MEND PLLC, which will include, but may not be limited to, weight, endurance, and/or resistance training. I do here and forever release and discharge and hereby hold harmless Koda CrossFit Iron View and its respective agents, heirs, assigns, contractors, volunteers, sponsors, judges, and employees and MEND PLLC and its respective agents, heirs, assigns, contractors, volunteers, sponsors, judges, and employees from any and all claims, demands, damages, rights of action, or causes of action, present or future, arising out of or connected with my participation in activities at Koda CrossFit Iron View and/or MEND PLLC, including any injuries resulting therefrom. <span class="caps">THIS WAIVER AND RELEASE OF LIABILITY INCLUDES, WITHOUT LIMITATION, INJURIES WHICH MAY OCCUR AS A RESULT OF (1) EQUIPMENT THAT MAY MALFUNCTION OR BREAK, (2) ANY SLIP, FALL, OR DROPPING OF EQUIPMENT, AND (3) NEGLIGENT INSTRUCTION OR SUPERVISION.</span></p>
+        </div>
+
+        <div class="card">
+          <h2>Assumption of Risk</h2>
+          <p>I recognize that exercise might be difficult and strenuous and that there could be dangers inherent in exercise for some individuals. I acknowledge that certain unusual physical changes during exercise may occur. These changes include abnormal blood pressure, fainting, disorders in heartbeat, heart attack, and, in rare instances, death.</p>
+          <p>I understand that as a result of my willing participation in activities at Koda CrossFit Iron View and/or MEND PLLC, I could suffer an injury or physical disorder that could result in my becoming partially or totally disabled and incapable of performing any gainful employment or having a normal social life.</p>
+          <p>As a willing participant in activities at Koda CrossFit Iron View and/or MEND PLLC, I represent and warrant that I have been examined by a competent physician who has determined that I am physically capable of participating in such activities.</p>
+          <p>I acknowledge and agree that I assume the risks associated with any and all activities and/or exercises in which I participate. I understand and acknowledge that I may terminate my participation in any physical activity at any time for any reason I deem necessary.</p>
+          <p><span class="caps">I ACKNOWLEDGE THAT I HAVE READ THIS WAIVER AND RELEASE AND FULLY UNDERSTAND THAT IT IS A RELEASE OF LIABILITY. BY SIGNING THIS DOCUMENT, I AM WAIVING ANY RIGHT I OR MY SUCCESSORS MIGHT HAVE TO BRING LEGAL ACTION OR ASSERT A CLAIM AGAINST KODA CROSSFIT IRON VIEW AND/OR MEND PLLC AND/OR THE OTHERS REFERRED TO IN THIS DOCUMENT FOR ANY NEGLIGENCE.</span></p>
+        </div>
+
+        <div class="card">
+          <h2>Photography and Audio/Video Recording</h2>
+          <p>I hereby give Koda CrossFit Iron View permission to video tape, photograph, and record my image and/or my likeness during my participation in any activities at Koda CrossFit Iron View. I also understand that giving this permission is in no way an endorsement of Koda CrossFit Iron View or any products distributed by Koda CrossFit Iron View.</p>
+        </div>
+
+        <div class="card">
+          <p><span class="caps">I HAVE CAREFULLY READ THIS DOCUMENT AND I FULLY UNDERSTAND ITS CONTENTS. I AM AWARE THAT THIS IS A RELEASE OF LIABILITY AND A CONTRACT BETWEEN ME AND KODA CROSSFIT IRON VIEW AND MEND PLLC.</span></p>
+        </div>
       </div>
 
-      <div class="card">
-        <h2>Assumption of Risk</h2>
-        <p>I recognize that exercise might be difficult and strenuous and that there could be dangers inherent in exercise for some individuals. I acknowledge that certain unusual physical changes during exercise may occur. These changes include abnormal blood pressure, fainting, disorders in heartbeat, heart attack, and, in rare instances, death.</p>
-        <p>I understand that as a result of my willing participation in activities at Koda CrossFit Iron View, I could suffer an injury or physical disorder that could result in my becoming partially or totally disabled and incapable of performing any gainful employment or having a normal social life.</p>
-        <p>As a willing participant in activities at Koda CrossFit Iron View, I represent and warrant that I have been examined by a competent physician who has determined that I am physically capable of participating in such activities.</p>
-        <p>I acknowledge and agree that I assume the risks associated with any and all activities and/or exercises in which I participate. I understand and acknowledge that I may terminate my participation in any physical activity at any time for any reason I deem necessary.</p>
-        <p><span class="caps">I ACKNOWLEDGE THAT I HAVE READ THIS WAIVER AND RELEASE AND FULLY UNDERSTAND THAT IT IS A RELEASE OF LIABILITY. BY SIGNING THIS DOCUMENT, I AM WAIVING ANY RIGHT I OR MY SUCCESSORS MIGHT HAVE TO BRING LEGAL ACTION OR ASSERT A CLAIM AGAINST KODA CROSSFIT IRON VIEW AND/OR THE OTHERS REFERRED TO IN THIS DOCUMENT FOR ANY NEGLIGENCE.</span></p>
-      </div>
+      <div class="card" id="formCard">
+        <h2>Sign Below</h2>
+        <p class="signing-for" id="signingFor"></p>
 
-      <div class="card">
-        <h2>Photography and Audio/Video Recording</h2>
-        <p>I hereby give Koda CrossFit Iron View permission to video tape, photograph, and record my image and/or my likeness during my participation in any activities at Koda CrossFit Iron View. I also understand that giving this permission is in no way an endorsement of Koda CrossFit Iron View or any products distributed by Koda CrossFit Iron View.</p>
-      </div>
+        <div class="field">
+          <label class="check">
+            <input type="checkbox" id="agree">
+            <span id="agreeText">I have carefully read this waiver and release, I fully understand its contents, and I voluntarily agree to its terms. I am aware that this is a release of liability and a contract between me and Koda CrossFit Iron View, and I sign it of my own free will.</span>
+          </label>
+        </div>
 
-      <div class="card">
-        <p><span class="caps">I HAVE CAREFULLY READ THIS DOCUMENT AND I FULLY UNDERSTAND ITS CONTENTS. I AM AWARE THAT THIS IS A RELEASE OF LIABILITY AND A CONTRACT BETWEEN ME AND KODA CROSSFIT IRON VIEW.</span></p>
+        <div class="field">
+          <div class="sig-head">
+            <label id="sigLabel" for="sigCanvas">Athlete Signature</label>
+            <span class="sig-date">Date: <span id="todayDisplay"></span></span>
+          </div>
+          <div class="sig-wrap">
+            <canvas id="sigCanvas"></canvas>
+            <div class="sig-hint" id="sigHint">Sign here with your finger or mouse</div>
+            <div class="sig-x">✕</div>
+            <div class="sig-line"></div>
+          </div>
+          <div class="sig-actions">
+            <button type="button" class="clear-btn" id="clearSig">Clear signature</button>
+          </div>
+        </div>
+
+        <button type="button" class="submit-btn" id="submitBtn">Sign &amp; Submit Waiver</button>
+        <div class="err" id="errMsg"></div>
       </div>
     </div>
 
-    <div class="card" id="formCard" style="display:none">
-      <h2>Sign Below</h2>
+    <!-- ══ Page 3: PAR-Q+ health screening — Women's Class only. Questions are built from the PARQ list in the script. ══ -->
+    <div id="pageParq" style="display:none">
+      <button type="button" class="back-btn" id="backToWaiver">&larr; Back to the waiver</button>
 
-      <div class="field">
-        <label for="athleteName">Athlete's Name (printed)</label>
-        <input type="text" id="athleteName" autocomplete="name" placeholder="Full name">
+      <div class="card">
+        <h2>PAR-Q+ Health Screening</h2>
+        <p class="parq-intro">Women&#8217;s Strength Class &middot; Please read each question carefully and answer Yes or No.</p>
+        <p class="parq-intro" id="parqMinorNote" style="display:none">Parent/guardian: please answer for the athlete.</p>
+        <div id="parqList"></div>
+        <button type="button" class="submit-btn" id="parqSubmitBtn">Submit Waiver &amp; Screening</button>
+        <div class="err" id="errParq"></div>
       </div>
-
-      <div class="field" id="programField">
-        <label for="program">Class Program</label>
-        <select id="program" required>
-          <option value="" disabled selected>Select a program…</option>
-          <option>CrossFit</option>
-          <option>Hyrox</option>
-          <option>Women's Class</option>
-          <option>Koda Kids/Teens</option>
-          <option>Kratos (Oly)</option>
-          <option>KodaFit</option>
-        </select>
-      </div>
-
-      <div class="row2">
-        <div class="field">
-          <label for="email">E-mail Address for Follow Up</label>
-          <input type="email" id="email" autocomplete="email" placeholder="you@example.com">
-        </div>
-        <div class="field">
-          <label for="referredBy">Referred By <span class="optional">(optional)</span></label>
-          <input type="text" id="referredBy" placeholder="Friend, Google, Instagram…">
-        </div>
-      </div>
-
-      <div class="field">
-        <label class="check">
-          <input type="checkbox" id="isMinor">
-          <span>The athlete is under 18 — a parent or guardian is signing this waiver.</span>
-        </label>
-      </div>
-
-      <div class="field" id="guardianField">
-        <label for="guardianName">Parent/Guardian Name (printed)</label>
-        <input type="text" id="guardianName" placeholder="Parent or guardian full name">
-      </div>
-
-      <div class="field">
-        <label class="check">
-          <input type="checkbox" id="agree">
-          <span>I have carefully read this waiver and release, I fully understand its contents, and I voluntarily agree to its terms. I am aware that this is a release of liability and a contract between me and Koda CrossFit Iron View, and I sign it of my own free will.</span>
-        </label>
-      </div>
-
-      <div class="field">
-        <div class="sig-head">
-          <label id="sigLabel" for="sigCanvas">Athlete Signature</label>
-          <span class="sig-date">Date: <span id="todayDisplay"></span></span>
-        </div>
-        <div class="sig-wrap">
-          <canvas id="sigCanvas"></canvas>
-          <div class="sig-hint" id="sigHint">Sign here with your finger or mouse</div>
-          <div class="sig-x">✕</div>
-          <div class="sig-line"></div>
-        </div>
-        <div class="sig-actions">
-          <button type="button" class="clear-btn" id="clearSig">Clear signature</button>
-        </div>
-      </div>
-
-      <button type="button" class="submit-btn" id="submitBtn">Sign &amp; Submit Waiver</button>
-      <div class="err" id="errMsg"></div>
     </div>
 
     <div class="card" id="successCard">
@@ -372,9 +484,11 @@
   <script>
     var API = "https://script.google.com/macros/s/AKfycbyk14st_Ix70GM0T2I8aKRU9HRBlotk_Up-Ikh5MHxYuUdDj4xIvj36r8lvQh15gPvm/exec";
 
+    function el(id) { return document.getElementById(id); }
+
     // ── Date display ──
     var now = new Date();
-    document.getElementById("todayDisplay").textContent =
+    el("todayDisplay").textContent =
       now.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
     function isoDate(d) {
       return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
@@ -393,10 +507,10 @@
     }
     function pruneExpired(today) {
       var els = document.querySelectorAll("[data-until]");
-      Array.prototype.forEach.call(els, function (el) {
-        if (today > el.getAttribute("data-until")) el.parentNode.removeChild(el);
+      Array.prototype.forEach.call(els, function (x) {
+        if (today > x.getAttribute("data-until")) x.parentNode.removeChild(x);
       });
-      var vb = document.getElementById("visitBtns"); // 3 columns only while all 3 choices are showing
+      var vb = el("visitBtns"); // 3 columns only while all 3 choices are showing
       vb.classList.toggle("cols3", vb.children.length >= 3);
     }
     pruneExpired(mtDate(now));
@@ -407,7 +521,7 @@
     var VENMO_INFO = '<a href="https://venmo.com/u/kevin-schuetz-5" target="_blank" rel="noopener">@kevin-schuetz-5</a>'; // shown to drop-ins who pick Venmo (empty = "ask at the front desk")
     var ZELLE_INFO = "kodaironview@gmail.com"; // shown to drop-ins who pick Zelle (empty = "ask at the front desk")
 
-    var visitType = "";     // "local" | "dropin"
+    var visitType = "";     // "local" | "dropin" | an EVENTS key
     var visitDuration = ""; // "1visit" | "week" | "longer"
     var visitPayment = "";  // "venmo" | "zelle" | "card"
 
@@ -422,28 +536,57 @@
     var VET = { program: "Veterans Day Event w/ Josh Bridges", visitType: "Veterans Day Event w/ Josh Bridges (Nov 11, 2026)" }; // #btnVet, auto-hides after Nov 11
     var EVENTS = { sim: SIM, ig: IG, vet: VET }; // event-style visit types: no class program, fixed program/visit type
 
+    // ── Pages ──
+    // 1 "info"   what brings you in + your information
+    // 2 "waiver" the waiver for the chosen program (Women's Class = combined Koda + Mend waiver), agree + sign
+    // 3 "parq"   PAR-Q+ health screening — Women's Class only
+    var step = "info";
+    var done = false;       // waiver submitted
+    var submitting = false;
+    var shownDocKey = "";   // which waiver + signer the signature on screen belongs to
+    var sigData = "";       // signature PNG (base64), captured when the waiver page is signed
+    var STEP_NAMES = { info: "Your information", waiver: "Waiver", parq: "Health screening" };
+
+    var AGREE_KODA = el("agreeText").textContent;
+    var AGREE_WOMENS = AGREE_KODA.replace("Koda CrossFit Iron View,", "Koda CrossFit Iron View and MEND PLLC,");
+
+    function currentProgram() { return EVENTS[visitType] ? EVENTS[visitType].program : el("program").value; }
+    function isWomens() { return /women/i.test(currentProgram()); }
+
+    function showErr(id, msg) { var e = el(id); e.textContent = msg; e.style.display = "block"; }
+    function hideErrs() { ["errInfo", "errMsg", "errParq"].forEach(function (id) { el(id).style.display = "none"; }); }
+
+    function updateStepBar() {
+      var bar = el("stepBar");
+      if (!visitType || done) { bar.style.display = "none"; return; }
+      var order = isWomens() ? ["info", "waiver", "parq"] : ["info", "waiver"];
+      bar.textContent = "Step " + (order.indexOf(step) + 1) + " of " + order.length + " · " + STEP_NAMES[step];
+      bar.style.display = "block";
+    }
+
     function selVisit(type) {
       visitType = type;
-      document.getElementById("btnLocal").classList.toggle("sel", type === "local");
-      document.getElementById("btnDropin").classList.toggle("sel", type === "dropin");
-      var simBtn = document.getElementById("btnSim");
+      el("btnLocal").classList.toggle("sel", type === "local");
+      el("btnDropin").classList.toggle("sel", type === "dropin");
+      var simBtn = el("btnSim");
       if (simBtn) simBtn.classList.toggle("sel", type === "sim");
-      var igBtn = document.getElementById("btnIG");
+      var igBtn = el("btnIG");
       if (igBtn) igBtn.classList.toggle("sel", type === "ig");
-      var vetBtn = document.getElementById("btnVet");
+      var vetBtn = el("btnVet");
       if (vetBtn) vetBtn.classList.toggle("sel", type === "vet");
-      document.getElementById("dropinQs").style.display = type === "dropin" ? "block" : "none";
+      el("dropinQs").style.display = type === "dropin" ? "block" : "none";
       // Event signers (Hyrox Sim, Iron Games) don't pick a class program — it's filled in for them
-      document.getElementById("programField").style.display = EVENTS[type] ? "none" : "block";
-      document.getElementById("waiverText").style.display = "block";
-      document.getElementById("formCard").style.display = "block";
-      initCanvas(); // canvas was hidden (zero-size) until now
+      el("programField").style.display = EVENTS[type] ? "none" : "block";
+      // Information first; the waiver shows on the next page once we know the program
+      el("infoCard").style.display = "block";
+      updateStepBar();
     }
-    document.getElementById("btnLocal").addEventListener("click", function () { selVisit("local"); });
-    document.getElementById("btnDropin").addEventListener("click", function () { selVisit("dropin"); });
-    if (document.getElementById("btnSim")) document.getElementById("btnSim").addEventListener("click", function () { selVisit("sim"); });
-    if (document.getElementById("btnIG")) document.getElementById("btnIG").addEventListener("click", function () { selVisit("ig"); });
-    if (document.getElementById("btnVet")) document.getElementById("btnVet").addEventListener("click", function () { selVisit("vet"); });
+    el("btnLocal").addEventListener("click", function () { selVisit("local"); });
+    el("btnDropin").addEventListener("click", function () { selVisit("dropin"); });
+    if (el("btnSim")) el("btnSim").addEventListener("click", function () { selVisit("sim"); });
+    if (el("btnIG")) el("btnIG").addEventListener("click", function () { selVisit("ig"); });
+    if (el("btnVet")) el("btnVet").addEventListener("click", function () { selVisit("vet"); });
+    el("program").addEventListener("change", updateStepBar);
 
     var durationBtns = document.querySelectorAll("#durationBtns .choice-btn");
     Array.prototype.forEach.call(durationBtns, function (b) {
@@ -457,8 +600,8 @@
     });
 
     function renderPayment() {
-      var payField = document.getElementById("paymentField");
-      var longerBox = document.getElementById("longerBox");
+      var payField = el("paymentField");
+      var longerBox = el("longerBox");
       if (visitDuration === "longer") {
         payField.style.display = "none";
         longerBox.style.display = "block";
@@ -474,7 +617,7 @@
         { id: "card", label: "Credit Card", sub: "secure checkout online" }
       ];
 
-      var wrap = document.getElementById("paymentBtns");
+      var wrap = el("paymentBtns");
       wrap.innerHTML = "";
       opts.forEach(function (o) {
         var btn = document.createElement("button");
@@ -488,7 +631,7 @@
         wrap.appendChild(btn);
       });
 
-      var box = document.getElementById("payBox");
+      var box = el("payBox");
       var price = (DURATIONS[visitDuration] || {}).price || "";
       var html = "";
       if (visitPayment === "venmo") {
@@ -508,19 +651,19 @@
     }
 
     // ── Minor toggle ──
-    var isMinorEl = document.getElementById("isMinor");
+    var isMinorEl = el("isMinor");
     isMinorEl.addEventListener("change", function () {
-      document.getElementById("guardianField").style.display = this.checked ? "block" : "none";
-      document.getElementById("sigLabel").textContent = this.checked ? "Parent/Guardian Signature" : "Athlete Signature";
+      el("guardianField").style.display = this.checked ? "block" : "none";
     });
 
     // ── Signature pad ──
-    var canvas = document.getElementById("sigCanvas");
+    var canvas = el("sigCanvas");
     var ctx = canvas.getContext("2d");
     var drawing = false, hasInk = false, last = null;
 
     function initCanvas() {
       var r = canvas.getBoundingClientRect();
+      if (!r.width || !r.height) return; // hidden (another page is showing) — keep whatever is drawn
       var dpr = window.devicePixelRatio || 1;
       // snapshot existing ink so a resize doesn't wipe the signature
       var snap = null;
@@ -541,6 +684,25 @@
       ctx.strokeStyle = "#1a1a2e";
     }
 
+    // Size the canvas to its box the first time it shows, and again only if the box changed
+    function fitCanvas() {
+      var r = canvas.getBoundingClientRect();
+      if (!r.width || !r.height) return;
+      var dpr = window.devicePixelRatio || 1;
+      if (canvas.width !== Math.round(r.width * dpr) || canvas.height !== Math.round(r.height * dpr)) initCanvas();
+    }
+
+    function clearSignature() {
+      hasInk = false;
+      sigData = "";
+      ctx.save();
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.restore();
+      el("sigHint").style.display = "flex";
+    }
+
     function pos(e) {
       var r = canvas.getBoundingClientRect();
       return { x: e.clientX - r.left, y: e.clientY - r.top };
@@ -548,8 +710,8 @@
 
     canvas.addEventListener("pointerdown", function (e) {
       e.preventDefault();
-      if (!canvas.width) initCanvas(); // canvas laid out after load (hidden tab, etc.)
-      canvas.setPointerCapture(e.pointerId);
+      fitCanvas(); // canvas laid out after load (hidden tab, etc.)
+      try { canvas.setPointerCapture(e.pointerId); } catch (err) { /* still draws without capture */ }
       drawing = true;
       last = pos(e);
       ctx.beginPath();
@@ -557,7 +719,8 @@
       ctx.lineTo(last.x + 0.01, last.y + 0.01);
       ctx.stroke();
       hasInk = true;
-      document.getElementById("sigHint").style.display = "none";
+      sigData = ""; // changed since it was last captured — the Sign button captures it again
+      el("sigHint").style.display = "none";
     });
     canvas.addEventListener("pointermove", function (e) {
       if (!drawing) return;
@@ -573,70 +736,280 @@
       canvas.addEventListener(evt, function () { drawing = false; });
     });
 
-    document.getElementById("clearSig").addEventListener("click", function () {
-      hasInk = false;
-      initCanvas();
-      document.getElementById("sigHint").style.display = "flex";
-    });
+    el("clearSig").addEventListener("click", clearSignature);
+    el("agree").addEventListener("change", function () { if (!this.checked) sigData = ""; });
 
-    window.addEventListener("resize", initCanvas);
-    initCanvas();
+    window.addEventListener("resize", fitCanvas);
 
-    // ── Submit ──
-    var submitBtn = document.getElementById("submitBtn");
+    // ── PAR-Q+ screening (Women's Class) ──
+    // Questions as supplied by Mend (Kristin Carpenter, Nov 2026). The backend prints the signed copy from its
+    // own matching list (WAIVER_PARQ in Code.js) — change the wording in both places and bump PARQ_VERSION.
+    var PARQ_VERSION = "2026-11";
+    var PARQ = [
+      { id: "q1", text: "Has a doctor ever said you have a heart condition or high blood pressure?",
+        subs: [{ id: "q1Heart", label: "Heart condition" }, { id: "q1Bp", label: "High blood pressure" }] },
+      { id: "q2", text: "Do you feel pain in your chest at rest, during your daily activities of living OR when you do physical activity?" },
+      { id: "q3", text: "Do you lose balance because of dizziness OR have you lost consciousness in the last 12 months?",
+        note: "Please answer NO if your dizziness was associated with over-breathing (including during vigorous exercise)." },
+      { id: "q4", text: "Have you ever been diagnosed with another chronic medical condition (other than heart disease or high blood pressure)?",
+        list: { id: "q4List", label: "Please list condition(s):" } },
+      { id: "q5", text: "Are you currently taking prescribed medications for a chronic medical condition?",
+        list: { id: "q5List", label: "Please list condition(s) and medication(s):" } },
+      { id: "q6", text: "Do you currently have (or have had in the past 12 months) a bone, joint, or soft tissue (muscle, ligament, or tendon) problem that could be made worse by becoming more physically active?",
+        note: "Please answer NO if you had a problem in the past but it does not limit your current ability to be physically active.",
+        list: { id: "q6List", label: "Please list condition(s) here:" } },
+      { id: "q7", text: "Has your doctor ever said that you should only do medically supervised physical activity?" }
+    ];
+    var parqAns = {}; // id -> "Yes" | "No"
 
-    function fail(msg) {
-      var el = document.getElementById("errMsg");
-      el.textContent = msg;
-      el.style.display = "block";
-      submitBtn.disabled = false;
-      submitBtn.textContent = "Sign & Submit Waiver";
+    function ynButtons(id, groupName, onPick) {
+      var g = document.createElement("div");
+      g.className = "yn";
+      g.setAttribute("role", "group");
+      g.setAttribute("aria-label", groupName);
+      ["Yes", "No"].forEach(function (v) {
+        var b = document.createElement("button");
+        b.type = "button";
+        b.className = "choice-btn yn-btn";
+        b.textContent = v;
+        b.setAttribute("data-q", id);
+        b.setAttribute("data-v", v);
+        b.setAttribute("aria-pressed", "false");
+        b.addEventListener("click", function () {
+          parqAns[id] = v;
+          Array.prototype.forEach.call(g.children, function (x) {
+            x.classList.toggle("sel", x === b);
+            x.setAttribute("aria-pressed", x === b ? "true" : "false");
+          });
+          if (onPick) onPick(v);
+        });
+        g.appendChild(b);
+      });
+      return g;
     }
 
-    submitBtn.addEventListener("click", function () {
-      document.getElementById("errMsg").style.display = "none";
+    (function buildParq() {
+      var wrap = el("parqList");
+      PARQ.forEach(function (q, i) {
+        var box = document.createElement("div");
+        box.className = "q";
+        var t = document.createElement("div");
+        t.className = "q-text";
+        t.textContent = (i + 1) + ". " + q.text;
+        box.appendChild(t);
+        if (q.note) {
+          var n = document.createElement("div");
+          n.className = "q-note";
+          n.textContent = q.note;
+          box.appendChild(n);
+        }
+        // follow-ups that only show after a Yes
+        var more = null;
+        if (q.subs || q.list) {
+          more = document.createElement("div");
+          more.className = "q-more";
+          more.style.display = "none";
+          (q.subs || []).forEach(function (s) {
+            var row = document.createElement("div");
+            row.className = "q-sub";
+            var lab = document.createElement("span");
+            lab.textContent = s.label;
+            row.appendChild(lab);
+            row.appendChild(ynButtons(s.id, s.label));
+            more.appendChild(row);
+          });
+          if (q.list) {
+            var l = document.createElement("label");
+            l.setAttribute("for", q.list.id);
+            l.textContent = q.list.label;
+            more.appendChild(l);
+            var ta = document.createElement("textarea");
+            ta.id = q.list.id;
+            ta.rows = 2;
+            ta.maxLength = 500;
+            more.appendChild(ta);
+          }
+        }
+        box.appendChild(ynButtons(q.id, "Question " + (i + 1), function (v) {
+          if (more) more.style.display = v === "Yes" ? "block" : "none";
+        }));
+        if (more) box.appendChild(more);
+        wrap.appendChild(box);
+      });
+    })();
 
-      var athleteName = document.getElementById("athleteName").value.trim();
-      var program = EVENTS[visitType] ? EVENTS[visitType].program : document.getElementById("program").value;
-      var email = document.getElementById("email").value.trim();
-      var referredBy = document.getElementById("referredBy").value.trim();
-      var isMinor = isMinorEl.checked;
-      var guardianName = document.getElementById("guardianName").value.trim();
-
-      if (!visitType) return fail("Please start at the top and tell us what brings you in.");
-      if (visitType === "dropin") {
-        if (!document.getElementById("visitFrom").value.trim()) return fail("Please tell us where you're from (top of the page).");
-        if (!visitDuration) return fail("Please choose how long you're in town (top of the page).");
-        if (visitDuration !== "longer" && !visitPayment) return fail("Please choose how you'd like to pay (top of the page).");
+    function parqError() {
+      for (var i = 0; i < PARQ.length; i++) {
+        var q = PARQ[i], n = i + 1;
+        if (!parqAns[q.id]) return "Please answer question " + n + ".";
+        if (parqAns[q.id] !== "Yes") continue;
+        if (q.subs) {
+          var anyYes = false;
+          for (var j = 0; j < q.subs.length; j++) {
+            var a = parqAns[q.subs[j].id];
+            if (!a) return "Question " + n + ": please answer Yes or No for “" + q.subs[j].label.toLowerCase() + "”.";
+            if (a === "Yes") anyYes = true;
+          }
+          if (!anyYes) return "Question " + n + ": you answered Yes, so please mark Yes for the one that applies (or change your answer to No).";
+        }
+        if (q.list && !el(q.list.id).value.trim()) return "Question " + n + ": please fill in the box under your Yes answer.";
       }
-      if (!athleteName) return fail("Please enter the athlete's name.");
-      if (!program) return fail("Please select a class program.");
-      if (!email || !/^\S+@\S+\.\S+$/.test(email)) return fail("Please enter a valid e-mail address.");
-      if (isMinor && !guardianName) return fail("Please enter the parent/guardian's name.");
-      if (!document.getElementById("agree").checked) return fail("Please check the box confirming you have read and agree to the waiver.");
-      if (!hasInk) return fail("Please sign in the signature box.");
+      return "";
+    }
 
-      submitBtn.disabled = true;
-      submitBtn.textContent = "Submitting…";
+    // Follow-up answers only count while their question is answered Yes
+    function parqPayload() {
+      var out = { version: PARQ_VERSION };
+      PARQ.forEach(function (q) {
+        var yes = parqAns[q.id] === "Yes";
+        out[q.id] = parqAns[q.id] || "";
+        (q.subs || []).forEach(function (s) { out[s.id] = yes ? (parqAns[s.id] || "") : ""; });
+        if (q.list) out[q.list.id] = yes ? el(q.list.id).value.trim() : "";
+      });
+      return out;
+    }
 
+    // ── Checks ──
+    function infoError() {
+      if (!visitType) return "Please start at the top and tell us what brings you in.";
+      if (visitType === "dropin") {
+        if (!el("visitFrom").value.trim()) return "Please tell us where you're from (top of the page).";
+        if (!visitDuration) return "Please choose how long you're in town (top of the page).";
+        if (visitDuration !== "longer" && !visitPayment) return "Please choose how you'd like to pay (top of the page).";
+      }
+      if (!el("athleteName").value.trim()) return "Please enter the athlete's name.";
+      if (!currentProgram()) return "Please select a class program.";
+      var email = el("email").value.trim();
+      if (!email || !/^\S+@\S+\.\S+$/.test(email)) return "Please enter a valid e-mail address.";
+      if (isMinorEl.checked && !el("guardianName").value.trim()) return "Please enter the parent/guardian's name.";
+      return "";
+    }
+
+    function signError() {
+      if (!el("agree").checked) return "Please check the box confirming you have read and agree to the waiver.";
+      if (!hasInk) return "Please sign in the signature box.";
+      return "";
+    }
+
+    // ── Page switching ──
+    function prepWaiver() {
+      var w = isWomens(), minor = isMinorEl.checked;
+      el("waiverKoda").style.display = w ? "none" : "block";
+      el("waiverWomens").style.display = w ? "block" : "none";
+      el("agreeText").textContent = w ? AGREE_WOMENS : AGREE_KODA;
+      el("sigLabel").textContent = minor ? "Parent/Guardian Signature" : "Athlete Signature";
+      el("signingFor").textContent = "Athlete: " + el("athleteName").value.trim() +
+        (minor ? " (signed by parent/guardian " + el("guardianName").value.trim() + ")" : "") +
+        " · " + currentProgram();
+      el("submitBtn").textContent = w ? "Sign & Continue to Health Screening" : "Sign & Submit Waiver";
+      // A signature belongs to the waiver it was written under. If the program now calls for the other waiver, or the
+      // signer changed (athlete vs. parent/guardian), start the agreement and signature over.
+      var key = (w ? "womens" : "koda") + "|" + (minor ? "guardian" : "self");
+      if (key !== shownDocKey) {
+        if (shownDocKey) { clearSignature(); el("agree").checked = false; }
+        shownDocKey = key;
+      }
+      fitCanvas(); // the canvas has no size until this page is showing
+    }
+
+    // Shows a page (falling back to an earlier one if that page's requirements aren't met) and returns the page shown
+    function show(next) {
+      if (next !== "info" && infoError()) next = "info";
+      if (next === "parq" && (!isWomens() || !sigData || !el("agree").checked)) next = "waiver";
+      step = next;
+      el("pageInfo").style.display = next === "info" ? "block" : "none";
+      el("pageWaiver").style.display = next === "waiver" ? "block" : "none";
+      el("pageParq").style.display = next === "parq" ? "block" : "none";
+      if (next === "waiver") prepWaiver();
+      if (next === "parq") el("parqMinorNote").style.display = isMinorEl.checked ? "block" : "none";
+      updateStepBar();
+      window.scrollTo(0, 0);
+      return next;
+    }
+    function go(next) {
+      var shown = show(next);
+      try { history.pushState({ step: shown }, ""); } catch (e) {}
+    }
+    // The phone's Back button moves between pages instead of leaving the waiver
+    try { history.replaceState({ step: "info" }, ""); } catch (e) {}
+    window.addEventListener("popstate", function (e) {
+      if (done || submitting) return;
+      hideErrs();
+      show((e.state && e.state.step) || "info");
+    });
+
+    el("toWaiverBtn").addEventListener("click", function () {
+      hideErrs();
+      var err = infoError();
+      if (err) return showErr("errInfo", err);
+      go("waiver");
+    });
+    el("backToInfo").addEventListener("click", function () { if (!submitting) { hideErrs(); go("info"); } });
+    el("backToWaiver").addEventListener("click", function () { if (!submitting) { hideErrs(); go("waiver"); } });
+
+    el("submitBtn").addEventListener("click", function () {
+      hideErrs();
+      var err = infoError();
+      if (err) { go("info"); return showErr("errInfo", err); }
+      err = signError();
+      if (err) return showErr("errMsg", err);
+      sigData = canvas.toDataURL("image/png").split(",")[1];
+      if (isWomens()) go("parq"); else submitWaiver();
+    });
+
+    el("parqSubmitBtn").addEventListener("click", function () {
+      hideErrs();
+      var err = infoError();
+      if (err) { go("info"); return showErr("errInfo", err); }
+      if (!isWomens() || !sigData || !el("agree").checked) { go("waiver"); return showErr("errMsg", signError() || "Please sign the waiver again."); }
+      err = parqError();
+      if (err) return showErr("errParq", err);
+      submitWaiver();
+    });
+
+    // ── Submit ──
+    function submitWaiver() {
+      if (submitting) return;
+      var womens = isWomens();
+      var btn = el(womens ? "parqSubmitBtn" : "submitBtn");
+      var errId = womens ? "errParq" : "errMsg";
+      var btnLabel = btn.textContent;
+      submitting = true;
+      btn.disabled = true;
+      btn.textContent = "Submitting…";
+
+      function fail(msg) {
+        submitting = false;
+        btn.disabled = false;
+        btn.textContent = btnLabel;
+        showErr(errId, msg);
+      }
+
+      var athleteName = el("athleteName").value.trim();
+      var email = el("email").value.trim();
+      var isMinor = isMinorEl.checked;
+      var guardianName = el("guardianName").value.trim();
       var isDropin = visitType === "dropin";
       var payload = {
         action: "waiverSubmit",
         athleteName: athleteName,
-        program: program,
+        program: currentProgram(),
         email: email,
-        referredBy: referredBy,
+        referredBy: el("referredBy").value.trim(),
         isMinor: isMinor,
         guardianName: isMinor ? guardianName : "",
         visitType: isDropin ? "Out-of-Town Drop-In" : (EVENTS[visitType] ? EVENTS[visitType].visitType : "Local Trial Class"),
-        visitFrom: isDropin ? document.getElementById("visitFrom").value.trim() : "",
+        visitFrom: isDropin ? el("visitFrom").value.trim() : "",
         visitDuration: isDropin && DURATIONS[visitDuration] ? DURATIONS[visitDuration].sheet : "",
         visitPayment: isDropin ? (PAYMENTS[visitPayment] || "") : "",
+        // which waiver was on screen when they signed: the backend prints that same one on the signed PDF
+        waiverDoc: womens ? "koda-mend-womens" : "koda",
         dateSigned: isoDate(now),
-        signaturePng: canvas.toDataURL("image/png").split(",")[1],
+        signaturePng: sigData,
         userAgent: navigator.userAgent,
         page: location.href
       };
+      if (womens) payload.parq = parqPayload();
 
       fetch(API, {
         method: "POST",
@@ -646,13 +1019,16 @@
         .then(function (r) { return r.json(); })
         .then(function (res) {
           if (res && res.status === "ok") {
+            done = true;
             var first = (isMinor && guardianName ? guardianName : athleteName).split(" ")[0];
-            document.getElementById("successTitle").textContent = "You're all set, " + first + "!";
-            document.getElementById("successMsg").textContent =
-              "Your signed waiver is on file with Koda CrossFit Iron View. A copy has been emailed to " + email + ".";
-            document.getElementById("formCard").style.display = "none";
-            document.getElementById("waiverText").style.display = "none";
-            document.getElementById("visitCard").style.display = "none";
+            el("successTitle").textContent = "You're all set, " + first + "!";
+            el("successMsg").textContent = womens
+              ? "Your signed waiver and health screening are on file with Koda CrossFit Iron View and Mend. A copy has been emailed to " + email + "."
+              : "Your signed waiver is on file with Koda CrossFit Iron View. A copy has been emailed to " + email + ".";
+            el("pageInfo").style.display = "none";
+            el("pageWaiver").style.display = "none";
+            el("pageParq").style.display = "none";
+            el("stepBar").style.display = "none";
             var payNote = "";
             if (isDropin) {
               var sPrice = (DURATIONS[visitDuration] || {}).price || "";
@@ -670,10 +1046,10 @@
             if (visitType === "sim") payNote = "You&#8217;re all set for today&#8217;s Hyrox Simulation &mdash; good luck out there! 🏁";
             if (visitType === "ig") payNote = "You&#8217;re all set for the Koda Iron Games &mdash; see you October 3&#8211;4! 🏆";
             if (visitType === "vet") payNote = "You&#8217;re all set for today&#8217;s Veterans Day event with Josh Bridges &mdash; thank you to everyone who has served. 🇺🇸";
-            var payEl = document.getElementById("successPay");
+            var payEl = el("successPay");
             payEl.innerHTML = payNote;
             payEl.style.display = payNote ? "block" : "none";
-            document.getElementById("successCard").style.display = "block";
+            el("successCard").style.display = "block";
             window.scrollTo({ top: 0, behavior: "smooth" });
           } else {
             fail("Something went wrong submitting the waiver. Please try again, or see the front desk.");
@@ -682,7 +1058,7 @@
         .catch(function () {
           fail("Couldn't reach the server. Please check your connection and try again.");
         });
-    });
+    }
   </script>
 </body>
 </html>
